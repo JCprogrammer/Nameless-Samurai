@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+	<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+	<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+	<ProductVersion>10.0.20506</ProductVersion>
+	<SchemaVersion>2.0</SchemaVersion>
+	<ProjectGuid>{DFE4AB9C-5C10-1F7A-CE17-AF9B46008971}</ProjectGuid>
+	<OutputType>Library</OutputType>
+	<AppDesignerFolder>Properties</AppDesignerFolder>
+	<RootNamespace></RootNamespace>
+	<AssemblyName>Assembly-CSharp</AssemblyName>
+	<TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+	<FileAlignment>512</FileAlignment>
+	<BaseDirectory>Assets</BaseDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+	<DebugSymbols>true</DebugSymbols>
+	<DebugType>full</DebugType>
+	<Optimize>false</Optimize>
+	<OutputPath>Temp\bin\Debug\</OutputPath>
+	<DefineConstants>DEBUG;TRACE;UNITY_STANDALONE_WIN;ENABLE_MICROPHONE;ENABLE_TEXTUREID_MAP;ENABLE_AUDIO_FMOD;UNITY_STANDALONE;ENABLE_MONO;ENABLE_SPRITES;ENABLE_TERRAIN;ENABLE_GENERICS;ENABLE_SUBSTANCE;INCLUDE_WP8SUPPORT;ENABLE_MOVIES;ENABLE_WWW;ENABLE_IMAGEEFFECTS;ENABLE_WEBCAM;INCLUDE_METROSUPPORT;RENDER_SOFTWARE_CURSOR;ENABLE_NETWORK;ENABLE_PHYSICS;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_2D_PHYSICS;ENABLE_SHADOWS;ENABLE_AUDIO;ENABLE_NAVMESH_CARVING;ENABLE_DUCK_TYPING;ENABLE_SINGLE_INSTANCE_BUILD_SETTING;UNITY_4_3_4;UNITY_4_3;UNITY_64;ENABLE_PROFILER;UNITY_EDITOR;UNITY_EDITOR_WIN;UNITY_TEAM_LICENSE</DefineConstants>
+	<ErrorReport>prompt</ErrorReport>
+	<WarningLevel>4</WarningLevel>
+	<NoWarn>0169</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+	<DebugType>pdbonly</DebugType>
+	<Optimize>true</Optimize>
+	<OutputPath>Temp\bin\Release\</OutputPath>
+	<DefineConstants>TRACE</DefineConstants>
+	<ErrorReport>prompt</ErrorReport>
+	<WarningLevel>4</WarningLevel>
+	<NoWarn>0169</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+	<Reference Include="System" />
+    <Reference Include="System.XML" />
+	<Reference Include="System.Core" />
+	<Reference Include="System.Xml.Linq" />
+	<Reference Include="UnityEngine">
+	  <HintPath>C:/Program Files (x86)/Unity/Editor/Data/Managed/UnityEngine.dll</HintPath>
+	</Reference>
+	<Reference Include="UnityEditor">
+	  <HintPath>C:/Program Files (x86)/Unity/Editor/Data/Managed/UnityEditor.dll</HintPath>
+	</Reference>
+  </ItemGroup>
+  <ItemGroup>
+     <Compile Include="Assets\Samurai Menu Sources\GameTitle.cs" />
+     <Compile Include="Assets\Samurai Menu Sources\LogoController.cs" />
+     <Compile Include="Assets\Samurai Menu Sources\MenuController.cs" />
+     <Compile Include="Assets\Samurai Menu Sources\MenuItemController.cs" />
+     <Compile Include="Assets\Samurai Menu Sources\MenuItemsController.cs" />
+     <Compile Include="Assets\Samurai Menu Sources\NarrativeController.cs" />
+     <Compile Include="Assets\Samurai Menu Sources\Position_Adjust.cs" />
+     <Compile Include="Assets\Samurai Menu Sources\Size_Adjust.cs" />
+     <Compile Include="Assets\Samurai Menu Sources\Tutorial.cs" />
+     <Compile Include="Assets\Scripts\AttackMechanic.cs" />
+     <Compile Include="Assets\Scripts\Samurai\ChunkGenerator.cs" />
+     <Compile Include="Assets\Scripts\Samurai\Enemy.cs" />
+     <Compile Include="Assets\Scripts\Samurai\GarbageObjects.cs" />
+     <Compile Include="Assets\Scripts\Samurai\Mechanics.cs" />
+     <Compile Include="Assets\Scripts\Samurai\SChunk.cs" />
+     <Compile Include="Assets\Scripts\Samurai\SamuraiSoundEffect.cs" />
+     <Compile Include="Assets\Scripts\Weapon.cs" />
+     <Compile Include="Assets\Scripts\WeaponBehaviour.cs" />
+     <Compile Include="Assets\TestingScripts\CollisionTest.cs" />
+     <Compile Include="Assets\Toolkits\BloodEffect\BloodEffectController.cs" />
+     <Compile Include="Assets\Toolkits\Sonic Ether\Natural Bloom\Demo Scene\Scripts\SENBDLCameraAnimation.cs" />
+     <Compile Include="Assets\Toolkits\Sonic Ether\Natural Bloom\Demo Scene\Scripts\SENBDLGlobal.cs" />
+     <Compile Include="Assets\Toolkits\Sonic Ether\Natural Bloom\Demo Scene\Scripts\SENBDLGlowingOrbitingCube.cs" />
+     <Compile Include="Assets\Toolkits\Sonic Ether\Natural Bloom\Demo Scene\Scripts\SENBDLMainCube.cs" />
+     <Compile Include="Assets\Toolkits\Sonic Ether\Natural Bloom\Demo Scene\Scripts\SENBDLOrbitingCube.cs" />
+     <Compile Include="Assets\Toolkits\Sonic Ether\Natural Bloom\Scripts\SENaturalBloomAndDirtyLens.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Controllers\ComponentEnabler.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Controllers\ControlerMotor.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Controllers\GameMasterControler.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Controllers\MainController.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Controllers\ObjectIdentity.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Controllers\RigidBodyEstablisher.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Controllers\SoundController.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Controllers\TimeC.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\HUD\BackToMenuButton.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\HUD\CameraRoller.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\HUD\MainMenu.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Motors\AdvancedV2DMotor.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Motors\CenterRotateMotor.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Motors\Enumerators.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Motors\GravityMotor.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Motors\HeartBeatEffect.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Motors\JumpMotor.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Motors\Motor.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Motors\SGAnimation.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Motors\Vector2MovementMotor.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Sensors\Checkpoint.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Sensors\HazardScensor.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Sensors\KeyboardSensor.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Sensors\SoundtrackTrigger.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Sensors\Trigger.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Structures\CubeFile.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Structures\GlobalVariables.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Structures\Grid.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Structures\Level.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Structures\Obj.cs" />
+     <Compile Include="Assets\Toolkits\iTween\Plugins\iTween.cs" />
+     <Compile Include="Assets\Toolkits\iTween\Sample\MoveSample.cs" />
+     <Compile Include="Assets\Toolkits\iTween\Sample\SampleInfo.cs" />
+     <None Include="Assets\Shaders\FirstShader.shader" />
+     <None Include="Assets\Toolkits\Sonic Ether\Natural Bloom\Shaders\SENaturalBloomAndDirtyLens.shader" />
+     <None Include="Assets\Toolkits\iTween\ReadMe!\ReadMe!.txt" />
+     <None Include="Assets\Toolkits\Sonic Ether\Natural Bloom\Shaders\SEParticlesAdditive.shader" />
+     <None Include="Assets\Shaders\DepthBlur.shader" />
+     <None Include="Assets\Samurai Menu Sources\Narrative.txt" />
+     <None Include="Assets\Shaders\Blurr.shader" />
+     <None Include="Assets\Toolkits\Sonic Ether\Natural Bloom\Shaders\SEEmissiveTextured.shader" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+	   Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  
+</Project>

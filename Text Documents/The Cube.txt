@@ -1,0 +1,24 @@
+block numbers per 1 frame in width: 16
+block numbers per 1 frame in height: 10/9
+
+normal jump: (x: 5 blocks, y:2 blocks)
+double jump: (x: 4 blocks, y: 1.5 blocks)
+
+Accessories: 
+-spring:  (x: depended on cubes horizontal speed, y: 4 blocks)
+-moving platforms (activated by triggers) : moves horizontally and vertically.
+-invisible triggers that activates moving platforms.
+-destroyable platforms.
+
+-glowing points that triggers double jump.
+
+Additonal features:
+
+- glowing points that triggers when cube comes near, gives the cube a pipe to swing with.
+
+- change of gravity.
+
+Hazards:
+- Blades.
+- wall blocks.
+- Triangles.

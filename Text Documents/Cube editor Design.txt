@@ -1,0 +1,40 @@
+ Cube Level Editor :
+
+An application Design interface that would help Game designers build levels.
+
+	- Each level consists of several chunks.
+	- Chunks are built on Grids.
+	- Grids are basic platforms that bring Designers schemes into orders that could fit in eachother.
+	- Grids can be nested. which means one grid can be fitted into another.
+	- The whole level itself is build on a huge grid, which name is the "Main Grid".
+
+	- Level Behaviors*
+		- HUD*
+
+	- Each chunk contains several objects that are either animated or solid. They are as written below:
+		- Basic Tiles that would build the skeleton of a chunk.
+		- Triggers that enable actions in specific location of a level (that would be in the current chunk or others).
+		-  Collectables
+		-
+
+
+
+	- Tiles are either animated or solid.
+	- Tiles animation are either coded or Baked by artists.
+
+	- Tiles Canvas width and height can be  either resizable or fixed.
+		- in case of resizable, tiles canvas would turn into a local grid, then the tile with the fixed size will fit in it, together they build the object.
+		- in case of fixed size, tiles canvas would be a square that the specific tile would fit in.
+
+	# chunks desgin would be tile based. Designers build chunks with several tiles that are available within the Editor.
+	# Tiles width and height sizes are powers of 2, Therefor with this design Grids can perfectly fit within eachother in case of nested grids.
+	
+
+
+Editors windows.
+
+
+Level Window:
+Tiles Manager:
+Object Creator:
+Chunk Creator:
