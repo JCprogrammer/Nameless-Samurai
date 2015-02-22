@@ -22,7 +22,7 @@ public class TimeC : MonoBehaviour {
     public void Increase()
     {
         if (deltaTime < 1)
-            deltaTime += 0.03f;
+            deltaTime += 0.003f;
         else
             deltaTime = 1;
     }
@@ -31,7 +31,7 @@ public class TimeC : MonoBehaviour {
     public void Decrease()
     {
         if (deltaTime - 0.03f > 0)
-            deltaTime -= 0.03f;
+            deltaTime -= 0.003f;
         else
             deltaTime =0;
     }

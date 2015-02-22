@@ -3,13 +3,13 @@ using System.Collections;
 
 public class HazardScensor : MonoBehaviour
 {
-
-    public string[] actions;
-    // Use this for initialization
-    public float sensationThreshold = 0.1f;
+    Vector3 meshSize;
+    public HazardAction[] hazardActions;
     void Start()
     {
-
+        if (hazardActions == null)
+            this.enabled = false;
+        meshSize = gameObject.transform.GetChild(0).GetComponent<MeshFilter>().mesh.bounds.size;
     }
     public void Destruct()
     {
@@ -29,29 +29,30 @@ public class HazardScensor : MonoBehaviour
         SendMessage("KillPower");
         Camera.main.SendMessage("KillPower");
     }
-    void OnCollisionStay2D(Collision2D coll)
+    void OnCollisionEnter2D(Collision2D coll)
     {
-      //if(gameObject.transform.position.x < coll.transform.position.x)
-      if(true)
+        if (hazardActions == null)
+            return;
+        foreach (var hazard in hazardActions)
         {
-            //if ((coll.gameObject.transform.position.y - coll.gameObject.transform.GetChild(0).GetComponent<MeshFilter>().mesh.bounds.size.y/2) <
-            //   (this.gameObject.transform.position.y + this.gameObject.transform.GetChild(0).GetComponent<MeshFilter>().mesh.bounds.size.y/2) - scensationThreshold)
-            //{
-          if (!(gameObject.transform.position.y - gameObject.transform.GetChild(0).GetComponent<MeshFilter>().mesh.bounds.size.y / 2 + sensationThreshold >
-            coll.transform.position.y + coll.transform.GetChild(0).GetComponent<MeshFilter>().mesh.bounds.size.y / 2))
-          {
-                //if ((coll.gameObject.transform.position.y + coll.gameObject.transform.GetChild(0).GetComponent<MeshFilter>().mesh.bounds.size.y/2) - scensationThreshold >
-                //   (this.gameObject.transform.position.y - this.gameObject.transform.GetChild(0).GetComponent<MeshFilter>().mesh.bounds.size.y/2) + scensationThreshold)
-                //{
-                    foreach (var item in actions)
-                    {
-                        SendMessage(item, SendMessageOptions.DontRequireReceiver);
-                    }
-               // }
-            }
+            if (!(gameObject.transform.position.y - meshSize.y + hazard.sensationThreshold>
+              coll.transform.position.y + coll.transform.GetChild(0).GetComponent<MeshFilter>().mesh.bounds.size.y / 2))
+            {
+                foreach (var item in hazard.actions)
+                {
+                    SendMessage(item, SendMessageOptions.DontRequireReceiver);
+                }
+
+            }    
         }
-
         
-
     }
+}
+
+[System.Serializable]
+public class HazardAction
+{
+    public string[] actions;
+    public string hazardTag;
+    public float sensationThreshold = 0.1f;
 }

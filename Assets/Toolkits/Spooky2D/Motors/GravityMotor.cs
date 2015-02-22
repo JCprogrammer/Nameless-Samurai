@@ -6,7 +6,7 @@ using System.Collections;
 public class GravityMotor: Motor {
 
     Vector3 meshSize;
-	bool gravityOn;
+	public bool gravityOn;
 	public float gravityForce = 0;
     public CollisionState collState;
 	public float MaxGravitySpeed;
@@ -41,38 +41,56 @@ public class GravityMotor: Motor {
 	}
     void OnCollisionEnter2D(Collision2D coll)
     {
-        //
-        if (gameObject.transform.position.y - meshSize.y / 2 + 0.5f >
-            coll.transform.position.y + coll.transform.GetChild(0).GetComponent<MeshFilter>().mesh.bounds.size.y / 2)
-        {
-            gameObject.transform.position = new Vector3(transform.position.x,
-                coll.transform.position.y + coll.transform.GetChild(0).GetComponent<MeshFilter>().mesh.bounds.size.y,
-                transform.position.z);
-            gravityForce = 0;
-            collState = CollisionState.onTop;
-            SendMessage("FixRotationDistortion");
-        }
+        //if (gameObject.transform.position.y - ((transform.localScale.y * meshSize.y / 2) + (0.5f * transform.localScale.y)) >
+        //    coll.transform.position.y + (transform.localScale.y * coll.transform.GetChild(0).GetComponent<MeshFilter>().mesh.bounds.size.y / 2))
+        //{
+        //    Debug.Log("Object Hit");
+        //    gameObject.transform.position = new Vector3(transform.position.x,
+        //        coll.transform.position.y + (coll.transform.GetChild(0).GetComponent<MeshFilter>().mesh.bounds.size.y * coll.transform.localScale.y) + (meshSize.y * transform.localScale.y),
+        //        transform.position.z);
+        //    gravityForce = 0;
+        //    collState = CollisionState.onTop;
+        //    SendMessage("FixRotationDistortion");
+        //}
 
-            
+        if (transform.position.y + ((GetComponent<BoxCollider2D>().size.y/2 + 0.1f) ) >
+       coll.transform.position.y + (coll.transform.GetComponent<BoxCollider2D>().size.y/2))
+        {
+            gravityOn = false;
+            gravityForce = 0;
+        }
        
     }
-    void OnCollisionStay2D(Collision2D coll)
-    {
-        if (collState == CollisionState.onTop)
-        {
-            gravityForce = 0;
-            if (!(gameObject.transform.position.y - meshSize.y / 2 + 0.5f >
-             coll.transform.position.y + coll.transform.GetChild(0).GetComponent<MeshFilter>().mesh.bounds.size.y / 2))
-            {
-                collState = CollisionState.none;
-            }
-        }
-    }
+    //void OnCollisionStay2D(Collision2D coll)
+    //{
+    //    if (collState == CollisionState.onTop)
+    //    {
+    //        gravityForce = 0;
+    //        if (!(gameObject.transform.position.y - meshSize.y / 2 + (0.5f * transform.localScale.y) >
+    //         coll.transform.position.y + coll.transform.GetChild(0).GetComponent<MeshFilter>().mesh.bounds.size.y / 2))
+    //        {
+    //            collState = CollisionState.none;
+    //        }
+    //    }
+    //}
     void OnCollisionExit2D(Collision2D coll)
     {
-        
+        Debug.Log(coll.collider.name);
+        if (Physics2D.Raycast(transform.position - new Vector3(0,GetComponent<BoxCollider2D>().size.y/2 + 0.1f,0),Vector3.forward))
+        {
+            print("There is something in front of the object!");
+        }
+        else
+        {
+            SendMessage("FreeToRotate",SendMessageOptions.DontRequireReceiver);
+            gravityOn = true;
+        }
     }
 
+    void OnDrawGizmos()
+    {
+        Gizmos.DrawLine(transform.position - new Vector3(0, GetComponent<BoxCollider2D>().size.y/2 + 0.5f, 0), transform.position - new Vector3(0, GetComponent<BoxCollider2D>().size.y/2 + 0.5f, 0) + (Vector3.forward * 100));
+    }
    
     public enum CollisionState
     {

@@ -11,14 +11,14 @@ public class CenterRotateMotor: Motor{
 				base.Cycle ();
 				if (!switchedOn)
 						return;
-                GravityMotor comp = GetComponent<GravityMotor>();
-                if (comp != null)
-                {
-                    if (comp.gravityForce > GlobalVariables.baseAccelerator)
-                        FreeToRotate();
-                }
-                else
-                    FreeToRotate();
+                //GravityMotor comp = GetComponent<GravityMotor>();
+                //if (comp != null)
+                //{
+                //    if (comp.gravityForce > GlobalVariables.baseAccelerator)
+                //        FreeToRotate();
+                //}
+                //else
+                //    FreeToRotate();
                 
 				if (freeToRotate)
 						transform.Rotate (0, 0, speed * 
