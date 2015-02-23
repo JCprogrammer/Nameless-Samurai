@@ -1,0 +1,27 @@
+[33mcommit db2735ce2010140d3ca5283c0d2c3830c1f36a2f[m
+Author: JCProgrammer <jprogrammer72@gmail.com>
+Date:   Mon Feb 23 02:39:37 2015 -0800
+
+    Time Reverser is implemented in this version pretty much alpha like
+    behavoir. needs to be polished. Jump motor collision detectoin and
+    gravity motor collision detection is polished. gravity motor collision
+    dtection still needs to be refined. ContactPoint2D is used in this
+    process.
+
+[33mcommit c9e36d6c6783abac2f2b5f3249aec9f66180c937[m
+Author: JCProgrammer <jprogrammer72@gmail.com>
+Date:   Sun Feb 22 14:14:46 2015 -0800
+
+    Some Hard coded code blocks in Gravity motor and jump motor is fixed, gravity now uses ray casting to predict collision in air. instead of mesh.bounds.size i use boxCollider2D.size.
+
+[33mcommit 898624519e798b5838b4cd4b501cf21627d84f28[m
+Author: JCProgrammer <jprogrammer72@gmail.com>
+Date:   Sun Feb 22 09:13:46 2015 -0800
+
+    New object added to CollisionTestScene
+
+[33mcommit 0cdcbe1e1028b571ce094f4384b45e01210f1581[m
+Author: JCProgrammer <jprogrammer72@gmail.com>
+Date:   Sun Feb 22 07:54:49 2015 -0800
+
+    First Commit for Project Samurai with Spooky2Di

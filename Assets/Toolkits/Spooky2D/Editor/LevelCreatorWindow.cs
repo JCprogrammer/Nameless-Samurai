@@ -699,7 +699,7 @@ public class LevelCreatorWindow : EditorWindow
             sceneObj = sceneObjContainer.transform.GetChild(0).gameObject;
             tmpFilter = sceneObj.GetComponent<MeshFilter>();
             tmpRenderer = sceneObj.GetComponent<MeshRenderer>();
-            objMaterial = tmpRenderer.sharedMaterial;
+            objMaterial = tmpRenderer.material;
         }
 
         Mesh mesh = new Mesh();
@@ -719,7 +719,8 @@ public class LevelCreatorWindow : EditorWindow
         //mesh.bounds = new Bounds (new Vector2 (mesh.bounds.center.x + (mesh.bounds.size.x / 2), mesh.bounds.center.y + (mesh.bounds.size.y / 2)), mesh.bounds.size);
         tmpFilter.mesh = mesh;
         objMaterial.SetTexture(0, Resources.Load<Texture>("Objects/" + item.texture));
-       
+        Shader defShader = Shader.Find("Transparent/Diffuse");
+        objMaterial.shader = defShader;
         tmpRenderer.material = objMaterial;
 
         Camera levelCamera = SceneView.FindObjectOfType<Camera>();
@@ -1064,8 +1065,11 @@ public class LevelCreatorWindow : EditorWindow
 
         GUI.DrawTexture(new Rect(190, 380, 100, 100), Resources.Load<Texture>("Coordinate"));
         if (selectedBlock != null)
-            GUI.DrawTexture(new Rect(585, 10, 60, 60), selectedBlock);
-
+        {
+            float max = Mathf.Max(selectedBlock.width, selectedBlock.height);
+            GUI.DrawTexture(new Rect(585, 10, 60 * (selectedBlock.width / max), 60 * (selectedBlock.height / max)), selectedBlock);
+            GUI.Label(new Rect(585, 73, 100, 20), selectedBlock.width + " X " + selectedBlock.height );
+        }
         List<int> selectedLayers = GetActiveLayer();
         int tempLayerNum =  GUI.SelectionGrid(new Rect(655, 10, 340, 60), activeLayer, layersName, 5);
         activeLayer = tempLayerNum;
