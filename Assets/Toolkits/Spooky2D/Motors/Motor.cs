@@ -14,10 +14,14 @@ public class Motor : MonoBehaviour
     public bool switchedOn = false;
     protected double timeSinceIgnition;
     public bool DebuggingMode = false;
-    
+
+    public bool record;
+    public Stack positionMotionStack;
+    public Stack rotationMotionStack;
     void Start()
     {
-        
+        positionMotionStack = new Stack();
+       
         if (igniteOnStart && igniteAfter < 0)
             Ignite();
         else if (igniteAfter >= 0)
@@ -102,4 +106,78 @@ public class Motor : MonoBehaviour
         Debug.Log("Enabled");
         this.enabled = true;
     }
+}
+//[System.Serializable]
+//public class MotionStack
+//{
+//    public SMotion root;
+  
+
+//    public MotionStack()
+//    {
+//        root = new SMotion();
+//        root.nextMotion = new SMotion();
+//        //TOS = root.nextMotion;
+//    }
+    
+
+//    public void Push(SMotion item)
+//    {
+//       if(root.nextMotion == null)
+//        else
+//        {
+//            SMotion newI = new SMotion();
+//            newI.content = item.content;
+//            TOS.nextMotion = newI;
+            
+//            SMotion temp = root.nextMotion;
+//            while (true)
+//            {
+//                if (temp.nextMotion == TOS)
+//                { }
+//            }
+//        }
+
+
+
+
+
+
+//        Debug.Log(root.nextMotion.content.ToString());
+//    }
+
+//    public SMotion Pop()
+//    {
+//        if (TOS == root)
+//        {
+//            SMotion temp = root;
+//            root = null;
+//            return temp;
+//        }
+//        else
+//        {
+//            SMotion temp = root.nextMotion;
+//            while (true)
+//            {
+//                if (temp.nextMotion == TOS)
+//                {
+//                    TOS = temp;
+//                    SMotion tmp2 = TOS.nextMotion;
+//                    TOS.nextMotion = null;
+//                    return tmp2;
+//                }
+//                else
+//                {
+//                    temp = temp.nextMotion;
+//                }
+//            }
+            
+//        }
+//    }
+//}
+[System.Serializable]
+public class SMotion
+{
+    public object content;
+    public SMotion nextMotion;
 }

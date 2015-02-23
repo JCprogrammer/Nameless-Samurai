@@ -35,15 +35,25 @@ public class HazardScensor : MonoBehaviour
             return;
         foreach (var hazard in hazardActions)
         {
-            if (!(gameObject.transform.position.y - meshSize.y + hazard.sensationThreshold>
-              coll.transform.position.y + coll.transform.GetChild(0).GetComponent<MeshFilter>().mesh.bounds.size.y / 2))
-            {
-                foreach (var item in hazard.actions)
+            //if (transform.position.y - (GetComponent<BoxCollider2D>().size.y / 2 + (hazard.sensationThreshold * transform.localScale.y)) >
+            //coll.transform.position.y + (coll.transform.GetComponent<BoxCollider2D>().size.y / 2))
+            //{
+            //if (!(gameObject.transform.position.y - meshSize.y + hazard.sensationThreshold>
+            //  coll.transform.position.y + coll.transform.GetChild(0).GetComponent<MeshFilter>().mesh.bounds.size.y / 2))
+            //{
+                Vector2 contactPoint =  coll.contacts[0].point;
+                Debug.Log(Vector3.Magnitude((contactPoint - (Vector2)transform.position)));
+                if (Vector3.Magnitude((contactPoint - (Vector2)transform.position)) < GetComponent<BoxCollider2D>().size.x / 2 - hazard.sensationThreshold)
                 {
-                    SendMessage(item, SendMessageOptions.DontRequireReceiver);
+                    if (coll.collider.tag == hazard.hazardTag)
+                    {
+                        foreach (var item in hazard.actions)
+                        {
+                            SendMessage(item, SendMessageOptions.DontRequireReceiver);
+                        }
+                    }
                 }
-
-            }    
+            //}    
         }
         
     }

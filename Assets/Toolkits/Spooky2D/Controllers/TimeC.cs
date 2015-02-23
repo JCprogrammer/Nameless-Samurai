@@ -30,10 +30,10 @@ public class TimeC : MonoBehaviour {
     
     public void Decrease()
     {
-        if (deltaTime - 0.03f > 0)
+        if (deltaTime - 0.03f > -1)
             deltaTime -= 0.003f;
         else
-            deltaTime =0;
+            deltaTime =-1;
     }
 
     public void Pause()
