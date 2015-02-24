@@ -67,19 +67,21 @@ public class LevelCreatorWindow : EditorWindow
     bool MovingSeeker = false;
     bool ctrlSelected = false;
     Rect seekerBoundry = new Rect(180, 85, 20, 22);
-
+    float gridScale = 1;
+    Rect gridScalerRect;
     public static List<ComponentGroup> serializedObjects;
 
     [MenuItem("Spooky Guys/Level Editor")]
     static void Init()
     {
-
+        
         objSelectorGrid = new LevelObj(new Rect(0, 0, 0, 0), Resources.Load<Texture>("HexaGridRed"), 0, 0);
         serializedObjects = new List<ComponentGroup>();
         level = new Level("NewLevel", 800, 400);
         grid = new Grid(level.width, level.height, new Rect(180, 90, 800, 400), 40, 40);
         window = (LevelCreatorWindow)EditorWindow.GetWindow(typeof(LevelCreatorWindow));
         window.minSize = new Vector2(1000, 700);
+        window.gridScalerRect = new Rect(160, 90, 20, 200);
         noChangesApplied = true;
         hScroll = 0;
         vScroll = 0;
@@ -439,8 +441,8 @@ public class LevelCreatorWindow : EditorWindow
                                                                                          grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll)).y)))
                         {
                             Debug.Log(lst5.getSelectedItemContent());
-                            level.objects.Add(new LevelObj(new Rect(grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll, 0)).x,
-                                                                  grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll)).y,
+                            level.objects.Add(new LevelObj(new Rect((grid.FilterPosition(filteredMousePosition+ new Vector2((int)hScroll, 0)).x) ,
+                                                                  (grid.FilterPosition(filteredMousePosition+ new Vector2(0, (int)vScroll)).y) ,
                                                                   grabbedObj.width,
                                                                   grabbedObj.height)
                                                          , Resources.Load<Texture>("Objects/" + lst5.getSelectedItemContent()), level.idAccumulator, 40 - ((activeLayer + 1) * 5)));
@@ -452,8 +454,8 @@ public class LevelCreatorWindow : EditorWindow
                     else
                     {
                         Debug.Log(lst5.getSelectedItemContent());
-                        level.objects.Add(new LevelObj(new Rect(grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll, 0)).x,
-                                                              grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll)).y,
+                        level.objects.Add(new LevelObj(new Rect((grid.FilterPosition(filteredMousePosition+ new Vector2((int)hScroll, 0)).x),
+                                                              (grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll)).y),
                                                               grabbedObj.width,
                                                               grabbedObj.height)
                                                        , Resources.Load<Texture>("Objects/" + lst5.getSelectedItemContent()), level.idAccumulator, 40 - ((activeLayer + 1) * 5)));
@@ -921,7 +923,7 @@ public class LevelCreatorWindow : EditorWindow
         TimeSpan = (((hScroll - 180 + seekerBoundry.xMin) + 10) / (5.665f * 40)).ToString();
         TimeSpan = ((float.Parse(TimeSpan) * (0.017f / GlobalVariables.deltaTime))).ToString();
         //TimeSpan = GUI.TextField(new Rect(150, 40, 60, 20), TimeSpan);
-        if (GUI.Button(new Rect(150, 40, 80, 20), "MovingCamera"))
+        if (GUI.Button(new Rect(150, 40, 100, 20), "MovingCamera"))
         {
             movingCameraPivot = true;
         }
@@ -930,10 +932,11 @@ public class LevelCreatorWindow : EditorWindow
         GUI.Label(new Rect(250, 40, 100, 20), "Patch Height:");
         grid.patchHeight = int.Parse(GUI.TextField(new Rect(325, 40, 80, 20),
                                                   grid.patchHeight.ToString()));
-
+        //grid.patchHeight = 40 * (int)(gridScale * 100) / 100;
         GUI.Label(new Rect(430, 40, 100, 20), "Patch Width:");
         grid.patchWidth = int.Parse(GUI.TextField(new Rect(500, 40, 80, 20),
-                                                  grid.patchWidth.ToString()));
+                                                    grid.patchWidth.ToString()));
+        //grid.patchWidth = 40 * (int)(gridScale * 100) / 100;
         GUI.Label(new Rect(280, 10, 100, 20), "lvl Height:");
         level.height = int.Parse(GUI.TextField(new Rect(340, 10, 80, 20),
                                                  level.height.ToString()));
@@ -982,6 +985,10 @@ public class LevelCreatorWindow : EditorWindow
         lst5.EventHandler();
         lst6.EventHandler();
 
+
+        gridScale = float.Parse(GUI.TextField(new Rect(115, 63, 50, 20), gridScale.ToString()));
+        gridScale = GUI.VerticalScrollbar(gridScalerRect, gridScale, 0.05f, 4, 0.1f);
+
         hScroll = GUI.HorizontalScrollbar(new Rect(180, 490, 800, 10), hScroll, grid.patchWidth, 0, level.width - grid.rect.width);
         vScroll = GUI.VerticalScrollbar(new Rect(980, 90, 10, 400), vScroll, grid.patchHeight, 0, level.height - grid.rect.height);
 
@@ -990,6 +997,7 @@ public class LevelCreatorWindow : EditorWindow
 
         grid.xMin = -(int)hScroll;
         grid.yMin = -(int)vScroll;
+        
         grid.Draw();
         MoveChunk();
         GenerateChunk();
@@ -1006,10 +1014,10 @@ public class LevelCreatorWindow : EditorWindow
 
                         if (chunkObject.position.depth == 40 - ((activeLayer + 1) * 5))
                         {
-                            Rect tmpRect = new Rect(chunkObject.position.left + ((Chunk)item).centerOfChunk.left - (int)hScroll,
-                                                    chunkObject.position.top + ((Chunk)item).centerOfChunk.top - (int)vScroll,
-                                                    chunkObject.position.width,
-                                                    chunkObject.position.height);
+                            Rect tmpRect = new Rect((chunkObject.position.left + ((Chunk)item).centerOfChunk.left - (int)hScroll) * gridScale,
+                                                    (chunkObject.position.top + ((Chunk)item).centerOfChunk.top - (int)vScroll) * gridScale,
+                                                    chunkObject.position.width * gridScale,
+                                                    chunkObject.position.height * gridScale);
                             if (!(tmpRect.xMin < grid.rect.xMin ||
                                  tmpRect.yMin < grid.rect.yMin ||
                                  tmpRect.xMax > grid.rect.xMax ||
@@ -1025,10 +1033,10 @@ public class LevelCreatorWindow : EditorWindow
             
             if (GetActiveLayer().Contains((40-item.position.depth)/5))
             {
-                Rect tmpRect = new Rect(item.position.left - (int)hScroll,
-                         item.position.top - (int)vScroll,
-                         item.position.width,
-                         item.position.height);
+                Rect tmpRect = new Rect((((item.position.left - grid.rect.left) * gridScale) + grid.rect.left- (int)hScroll),
+                                        (((item.position.top - grid.rect.top) * gridScale) + grid.rect.top - (int)vScroll),
+                                        item.position.width * gridScale,
+                                        item.position.height * gridScale);
                 if (!(tmpRect.xMin < grid.rect.xMin ||
                      tmpRect.yMin < grid.rect.yMin ||
                      tmpRect.xMax > grid.rect.xMax ||
@@ -1041,10 +1049,10 @@ public class LevelCreatorWindow : EditorWindow
         {
             if (item.position.depth == 40 - ((activeLayer + 1) * 5))
             {
-                Rect tmpRect = new Rect(item.position.left - (int)hScroll + (dynamicSelection.boundry.xMin - dynamicSelection.firstPos.x),
-                         item.position.top - (int)vScroll + (dynamicSelection.boundry.yMin - dynamicSelection.firstPos.y),
-                         item.position.width,
-                         item.position.height);
+                Rect tmpRect = new Rect((item.position.left - (int)hScroll + (dynamicSelection.boundry.xMin - dynamicSelection.firstPos.x)) * gridScale,
+                         (item.position.top - (int)vScroll + (dynamicSelection.boundry.yMin - dynamicSelection.firstPos.y)) * gridScale,
+                         item.position.width * gridScale,
+                         item.position.height * gridScale);
                 if (!(tmpRect.xMin < grid.rect.xMin ||
                      tmpRect.yMin < grid.rect.yMin ||
                      tmpRect.xMax > grid.rect.xMax ||
@@ -1053,10 +1061,10 @@ public class LevelCreatorWindow : EditorWindow
             }
         }
 
-        Rect tmpR = new Rect(objSelectorGrid.position.left - (int)hScroll,
-                             objSelectorGrid.position.top - (int)vScroll,
-                             objSelectorGrid.position.width,
-                             objSelectorGrid.position.height);
+        Rect tmpR = new Rect((objSelectorGrid.position.left - (int)hScroll) * gridScale,
+                             (objSelectorGrid.position.top - (int)vScroll)* gridScale,
+                             objSelectorGrid.position.width * gridScale,
+                             objSelectorGrid.position.height * gridScale);
         if (!(tmpR.xMin < grid.rect.xMin ||
              tmpR.yMin < grid.rect.yMin ||
              tmpR.xMax > grid.rect.xMax ||
