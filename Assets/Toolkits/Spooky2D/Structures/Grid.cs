@@ -3,8 +3,8 @@ using System.Collections;
 
 public class Grid
 {
-	public int patchWidth;
-	public int patchHeight;
+	public float patchHeight;
+	public float patchWidth;
 	public Rect rect;
 	public int contentWidth;
 	public int contentHeight;
@@ -26,12 +26,14 @@ public class Grid
 		this.contentWidth = contentWidth;
 		this.contentHeight = contentHeight;
 	}
-	public Vector2 FilterPosition(Vector2 position)
+	public Vector2 FilterPosition(Vector2 position , float gridScale = 1)
 	{
 		position = new Vector2 (position.x - rect.xMin, position.y - rect.yMin);
-		float fixedPosX = (Mathf.FloorToInt(position.x / patchWidth) * patchWidth) ; 
-		float fixedPosY = (Mathf.FloorToInt (position.y / patchHeight) * patchHeight); 
-		return new Vector2 (fixedPosX + rect.xMin, fixedPosY + rect.yMin);
+        float fixedPosX = (Mathf.FloorToInt(position.x / (patchWidth / gridScale)) * (patchWidth / gridScale));
+        float fixedPosY = (Mathf.FloorToInt(position.y / (patchHeight / gridScale)) * (patchHeight / gridScale));
+        Debug.Log(patchHeight);
+        return new Vector2 (fixedPosX + rect.xMin, fixedPosY + rect.yMin);
+        
 	}
 	public void Draw()
 	{

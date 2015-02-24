@@ -420,9 +420,10 @@ public class LevelCreatorWindow : EditorWindow
 
         if (Event.current.control)
         {
-            Vector2 filteredMousePosition = new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x,
-                                                         HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y);
-            if (grid.rect.Contains(filteredMousePosition))
+            Vector2 filteredMousePosition = new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x - grid.rect.left,
+                                                         HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y - grid.rect.top);
+            filteredMousePosition /= gridScale;
+            if (grid.rect.Contains(filteredMousePosition*gridScale + new Vector2(grid.rect.left,grid.rect.top)))
             {
                 grabbedObj = new Rect(filteredMousePosition.x,
                                        filteredMousePosition.y,
@@ -436,26 +437,38 @@ public class LevelCreatorWindow : EditorWindow
                 {
                     if (level.objects.Count > 0)
                     {
-
-                        if (!ChangeType(level.objects[level.objects.Count - 1].position).Contains(new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll, 0)).x,
-                                                                                         grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll)).y)))
+                        bool allowedToAdd = true;
+                        foreach (var item in level.objects)
                         {
-                            Debug.Log(lst5.getSelectedItemContent());
-                            level.objects.Add(new LevelObj(new Rect((grid.FilterPosition(filteredMousePosition+ new Vector2((int)hScroll, 0)).x) ,
-                                                                  (grid.FilterPosition(filteredMousePosition+ new Vector2(0, (int)vScroll)).y) ,
-                                                                  grabbedObj.width,
-                                                                  grabbedObj.height)
-                                                         , Resources.Load<Texture>("Objects/" + lst5.getSelectedItemContent()), level.idAccumulator, 40 - ((activeLayer + 1) * 5)));
-                            //lst4.Additem(new string[] {level.objects[level.objects.Count-1].texture +"." + level.objects[level.objects.Count-1].id.ToString()});
-                            lst4.Additem(new string[] { level.objects[level.objects.Count - 1].texture + "." + level.idAccumulator.ToString() });
-                            level.idAccumulator++;
+                            if (ChangeType(item.position).Contains(new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll + grid.rect.left, 0)).x,
+                                                                                             grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll + grid.rect.top)).y)))
+                            {
+                                allowedToAdd = false;
+                                break;
+                            }
                         }
+                        if(allowedToAdd)
+                            {
+                                Debug.Log(lst5.getSelectedItemContent());
+
+                                level.objects.Add(new LevelObj(new Rect((grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll + grid.rect.left, 0),gridScale).x),
+                                                                      (grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll + grid.rect.top),gridScale).y),
+                                                                      grabbedObj.width,
+                                                                      grabbedObj.height)
+                                                             , Resources.Load<Texture>("Objects/" + lst5.getSelectedItemContent()), level.idAccumulator, 40 - ((activeLayer + 1) * 5)));
+                                //lst4.Additem(new string[] {level.objects[level.objects.Count-1].texture +"." + level.objects[level.objects.Count-1].id.ToString()});
+                                lst4.Additem(new string[] { level.objects[level.objects.Count - 1].texture + "." + level.idAccumulator.ToString() });
+                                level.idAccumulator++;
+                               
+                            }    
+                        
+                        
                     }
                     else
                     {
                         Debug.Log(lst5.getSelectedItemContent());
-                        level.objects.Add(new LevelObj(new Rect((grid.FilterPosition(filteredMousePosition+ new Vector2((int)hScroll, 0)).x),
-                                                              (grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll)).y),
+                        level.objects.Add(new LevelObj(new Rect((grid.FilterPosition(filteredMousePosition+ new Vector2((int)hScroll + grid.rect.left, 0),gridScale).x),
+                                                              (grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll + grid.rect.top),gridScale).y),
                                                               grabbedObj.width,
                                                               grabbedObj.height)
                                                        , Resources.Load<Texture>("Objects/" + lst5.getSelectedItemContent()), level.idAccumulator, 40 - ((activeLayer + 1) * 5)));
@@ -557,7 +570,7 @@ public class LevelCreatorWindow : EditorWindow
                 {
                     if (ChangeType(item.position).Contains(filteredMousePosition) && (item.position.depth == 40 - (activeLayer + 1) * 5))
                     {
-                        lst4.DeleteItem(new string[] { item.texture + item.id.ToString() });
+                        lst4.DeleteItem(new string[] { item.texture + "." + item.id.ToString() });
                         level.objects.Remove(item);
                         deletedItems.Add(item.texture + "." + item.id.ToString());
 
@@ -722,7 +735,9 @@ public class LevelCreatorWindow : EditorWindow
         tmpFilter.mesh = mesh;
         objMaterial.SetTexture(0, Resources.Load<Texture>("Objects/" + item.texture));
         Shader defShader = Shader.Find("Transparent/Diffuse");
+        
         objMaterial.shader = defShader;
+        objMaterial.color = new Color(1, 1, 1);
         tmpRenderer.material = objMaterial;
 
         Camera levelCamera = SceneView.FindObjectOfType<Camera>();
@@ -908,7 +923,7 @@ public class LevelCreatorWindow : EditorWindow
         {
             DeleteLevel();
         }
-        AddItem();
+        
         if (dynamicSelection.objects.Count == 0)
             Object_MouseSelector();
 
@@ -932,11 +947,11 @@ public class LevelCreatorWindow : EditorWindow
         GUI.Label(new Rect(250, 40, 100, 20), "Patch Height:");
         grid.patchHeight = int.Parse(GUI.TextField(new Rect(325, 40, 80, 20),
                                                   grid.patchHeight.ToString()));
-        //grid.patchHeight = 40 * (int)(gridScale * 100) / 100;
+        //grid.patchHeight = 40 * gridScale;
         GUI.Label(new Rect(430, 40, 100, 20), "Patch Width:");
         grid.patchWidth = int.Parse(GUI.TextField(new Rect(500, 40, 80, 20),
                                                     grid.patchWidth.ToString()));
-        //grid.patchWidth = 40 * (int)(gridScale * 100) / 100;
+        //grid.patchWidth = 40 * gridScale;
         GUI.Label(new Rect(280, 10, 100, 20), "lvl Height:");
         level.height = int.Parse(GUI.TextField(new Rect(340, 10, 80, 20),
                                                  level.height.ToString()));
@@ -957,7 +972,7 @@ public class LevelCreatorWindow : EditorWindow
         {
             CommitChanges();
         }
-
+        AddItem();
         if (GUI.Button(new Rect(10, 63, 100, 20), "Clear"))
         {
             foreach (var item in level.objects)
