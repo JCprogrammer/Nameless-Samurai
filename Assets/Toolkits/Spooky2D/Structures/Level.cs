@@ -5,13 +5,13 @@ using System.Collections.Generic;
 [System.Serializable]
 public class ObjRect
 {
-	public int left;
-	public int top;
+	public float left;
+	public float top;
 	public int width;
 	public int height;
 	public int depth;
 
-	public ObjRect(int left, int top,int width,int height)
+	public ObjRect(float left, float top,int width,int height)
 	{
 		this.left = left;
 		this.top = top;
@@ -19,7 +19,7 @@ public class ObjRect
 		this.height = height;
 		depth = 0;
 	}
-    public ObjRect(int left, int top, int width, int height , int depth) : this(left,top,width,height)
+    public ObjRect(float left, float top, int width, int height , int depth) : this(left,top,width,height)
     {
         this.depth = depth;
     }

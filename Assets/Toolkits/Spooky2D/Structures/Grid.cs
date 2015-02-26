@@ -3,6 +3,8 @@ using System.Collections;
 
 public class Grid
 {
+    public float basePatchHeight;
+    public float basePatchWidth;
 	public float patchHeight;
 	public float patchWidth;
 	public Rect rect;
@@ -19,6 +21,8 @@ public class Grid
 	{
 		this.patchHeight = patchHeight;
 		this.patchWidth = patchWidth;
+        this.basePatchHeight = patchHeight;
+        this.basePatchWidth = patchWidth;
 		rect = initiationPosition;
 		content = GUIContent.none;
 		yMin = (int)rect.yMin;
