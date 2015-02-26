@@ -144,8 +144,8 @@ public class LevelCreatorWindow : EditorWindow
                                          HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y);
             if (grid.rect.Contains(filteredMousePosition))
             {
-                Vector2 grabbedPosition = new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll, 0)).x,
-                                              grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll)).y);
+                Vector2 grabbedPosition = new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2(hScroll, 0)).x,
+                                              grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll)).y);
 
                 level.cameraPivot = new ObjRect((int)grabbedPosition.x,(int)grabbedPosition.y,40,40);
                 if (Event.current.button == 0 && Event.current.type == EventType.mouseDown)
@@ -162,15 +162,16 @@ public class LevelCreatorWindow : EditorWindow
             foreach (var item in dynamicSelection.objects)
             {
 
-                item.position = new ObjRect(item.position.left + (int)(dynamicSelection.boundry.xMin - dynamicSelection.firstPos.x),
-                    item.position.top + (int)(dynamicSelection.boundry.yMin - dynamicSelection.firstPos.y),
-                    item.position.width,
-                    item.position.height, 40 - ((activeLayer + 1) * 5));
+                    item.position = new ObjRect(item.position.left + (dynamicSelection.boundry.xMin - dynamicSelection.firstPos.x)/gridScale,
+                                                item.position.top +  (dynamicSelection.boundry.yMin - dynamicSelection.firstPos.y)/gridScale,
+                                                item.position.width,
+                                                item.position.height,
+                                                40 - ((activeLayer + 1) * 5));
                 
             }
         }
-        dynamicSelection.drawRect = new Rect(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + (int)hScroll,
-                          HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y + (int)vScroll, 0, 0);
+        dynamicSelection.drawRect = new Rect(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + hScroll,
+                          HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y + vScroll, 0, 0);
         if (dynamicSelection.isClonning)
             level.objects.AddRange(dynamicSelection.objects);
         dynamicSelection.objects = new List<LevelObj>();
@@ -188,8 +189,8 @@ public class LevelCreatorWindow : EditorWindow
             {
                 dynamicSelection.drawRect = new Rect(dynamicSelection.drawRect.xMin,
                                                      dynamicSelection.drawRect.yMin,
-                                                     HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + (int)hScroll - dynamicSelection.drawRect.xMin,
-                                                     HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y + (int)vScroll - dynamicSelection.drawRect.yMin);
+                                                     HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + hScroll - dynamicSelection.drawRect.xMin,
+                                                     HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y + vScroll - dynamicSelection.drawRect.yMin);
 
 
             }
@@ -204,20 +205,26 @@ public class LevelCreatorWindow : EditorWindow
                 dynamicSelection.drawRect.yMax = max;
                 foreach (LevelObj item in level.objects)
                 {
-                    if (dynamicSelection.drawRect.Contains(new Vector2(item.position.left, item.position.top)) && ( GetActiveLayer().Contains((40 -item.position.depth)/5)))
+                    if (dynamicSelection.drawRect.Contains(new Vector2((item.position.left - grid.rect.left) * gridScale + grid.rect.left,
+                                                                       (item.position.top - grid.rect.top)*gridScale + grid.rect.top)) 
+                                                            && ( GetActiveLayer().Contains((40 -item.position.depth)/5)))
                     {
                         dynamicSelection.objects.Add(item);
 
                         if (dynamicSelection.objects.Count == 1)
                         {
                             dynamicSelection.boundry = ChangeType(item.position);
+                            dynamicSelection.boundry = new Rect((dynamicSelection.boundry.left - grid.rect.left) * gridScale + grid.rect.left,
+                                                                 (dynamicSelection.boundry.top - grid.rect.top) * gridScale + grid.rect.top,
+                                                                 dynamicSelection.boundry.width * gridScale,
+                                                                 dynamicSelection.boundry.height * gridScale);
                         }
                         else if (dynamicSelection.objects.Count > 1)
                         {
-                            dynamicSelection.boundry.xMin = Mathf.Min(dynamicSelection.boundry.xMin, ChangeType(item.position).xMin);
-                            dynamicSelection.boundry.xMax = Mathf.Max(dynamicSelection.boundry.xMax, ChangeType(item.position).xMax);
-                            dynamicSelection.boundry.yMin = Mathf.Min(dynamicSelection.boundry.yMin, ChangeType(item.position).yMin);
-                            dynamicSelection.boundry.yMax = Mathf.Max(dynamicSelection.boundry.yMax, ChangeType(item.position).yMax);
+                            dynamicSelection.boundry.xMin = Mathf.Min(dynamicSelection.boundry.xMin, ((ChangeType(item.position).xMin - grid.rect.left)*gridScale)+ grid.rect.left);
+                            dynamicSelection.boundry.xMax = Mathf.Max(dynamicSelection.boundry.xMax, ((ChangeType(item.position).xMax - grid.rect.left)*gridScale)+ grid.rect.left);
+                            dynamicSelection.boundry.yMin = Mathf.Min(dynamicSelection.boundry.yMin, ((ChangeType(item.position).yMin - grid.rect.top) * gridScale) + grid.rect.top);
+                            dynamicSelection.boundry.yMax = Mathf.Max(dynamicSelection.boundry.yMax, ((ChangeType(item.position).yMax - grid.rect.top) * gridScale) + grid.rect.top);
                         }
                         dynamicSelection.firstPos = new Vector2(dynamicSelection.boundry.xMin, dynamicSelection.boundry.yMin);
                     }
@@ -237,16 +244,18 @@ public class LevelCreatorWindow : EditorWindow
         }
         else if (Event.current.type == EventType.mouseDrag)
         {
-            Vector2 tmpV = grid.FilterPosition(new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + (int)hScroll,
-                                   HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y + (int)vScroll));
+            Vector2 tmpV = grid.FilterPosition(new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x ,
+                                                            HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y ));
             dynamicSelection.boundry = new Rect(tmpV.x,
-                                   tmpV.y, dynamicSelection.drawRect.width, dynamicSelection.drawRect.height);
+                                                tmpV.y,
+                                                dynamicSelection.drawRect.width,
+                                                dynamicSelection.drawRect.height);
 
             dynamicSelection.drawRect = dynamicSelection.boundry;
-            foreach (var item in dynamicSelection.objects)
-            {
-                item.position.depth = 40 - ((activeLayer + 1) * 5);
-            }
+            //foreach (var item in dynamicSelection.objects)
+            //{
+            //    item.position.depth = 40 - ((activeLayer + 1) * 5);
+            //}
 
         }
         else if (Event.current.shift)
@@ -309,8 +318,8 @@ public class LevelCreatorWindow : EditorWindow
             else
                 dynamicSelection.drawRect = new Rect();
         }
-        Rect tmpR = new Rect(dynamicSelection.drawRect.xMin - (int)hScroll,
-                                    dynamicSelection.drawRect.yMin - (int)vScroll,
+        Rect tmpR = new Rect(dynamicSelection.drawRect.xMin - hScroll,
+                                    dynamicSelection.drawRect.yMin - vScroll,
                                     dynamicSelection.drawRect.width,
                                     dynamicSelection.drawRect.height);
         if (!(tmpR.xMin < grid.rect.xMin ||
@@ -374,9 +383,10 @@ public class LevelCreatorWindow : EditorWindow
         if (Event.current.control)
         {
 
-            Vector2 filteredMousePosition = new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x,
-                                         HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y);
-            if (grid.rect.Contains(filteredMousePosition))
+            Vector2 filteredMousePosition = new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x - grid.rect.left,
+                                                         HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y - grid.rect.top);
+            filteredMousePosition /= gridScale;
+            if (grid.rect.Contains(filteredMousePosition * gridScale + new Vector2(grid.rect.left, grid.rect.top)))
             {
 
                 grabbedObj = new Rect(filteredMousePosition.x,
@@ -388,32 +398,48 @@ public class LevelCreatorWindow : EditorWindow
                 {
                     if (level.objects.Count > 0)
                     {
-                        Vector2 grabbedPosition = new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll, 0)).x,
-                                              grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll)).y);
+                        Vector2 grabbedPosition = new Vector2((grid.FilterPosition(filteredMousePosition + new Vector2(hScroll + grid.rect.left, 0), gridScale).x),
+                                                              (grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll + grid.rect.top), gridScale).y));
                         foreach (LevelObj item in level.objects)
                         {
-                            //if (item.position.left == grabbedPosition.x && item.position.top == grabbedPosition.y) {
-                            if (ChangeType(item.position).Contains(grabbedPosition) && (item.position.depth == 40 - (activeLayer + 1) * 5))
+                            if (item.position.depth == 40 - ((activeLayer + 1) * 5))
                             {
-                                lst4.SelectItem(item.texture + "." + item.id);
-                                SelectItemOnScene("");
+                                if (ChangeType(item.position).Contains(grabbedPosition))
+                                {
+                                    lst4.SelectItem(item.texture + "." + item.id);
+                                    SelectItemOnScene("");
+                                }
                             }
                         }
                     }
                 }
                 else if (Event.current.button == 0 && Event.current.type == EventType.mouseDrag)
                 {
+
                     if (level.objects.Count > 0)
                     {
-                        Vector2 grabbedPosition = new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll, 0)).x,
-                                              grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll)).y);
-                        selectedLevelObj.position = new ObjRect((int)grabbedPosition.x, (int)grabbedPosition.y, selectedLevelObj.position.width, selectedLevelObj.position.height, 40 - ((activeLayer + 1) * 5));
+                        Vector2 grabbedPosition = new Vector2((grid.FilterPosition(filteredMousePosition + new Vector2(hScroll + grid.rect.left, 0), gridScale).x),
+                                                           (grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll + grid.rect.top), gridScale).y));
 
+                        selectedLevelObj.position = new ObjRect(grabbedPosition.x, grabbedPosition.y, selectedLevelObj.position.width, selectedLevelObj.position.height, 40 - ((activeLayer + 1) * 5));
+                        Debug.Log("dragging");
                         SelectItemOnScene("");
                     }
+                    else
+                    {
+                        Debug.Log("not dragging");
+                    }
+                }
+                else
+                {
+                    Debug.Log("not dragging");
                 }
             }
 
+        }
+        else
+        {
+            Debug.Log("its not in rect");
         }
     }
     void AddItem()
@@ -441,19 +467,22 @@ public class LevelCreatorWindow : EditorWindow
                         bool allowedToAdd = true;
                         foreach (var item in level.objects)
                         {
-                            if (ChangeType(item.position).Contains(new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll + grid.rect.left, 0),gridScale).x,
-                                                                                             grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll + grid.rect.top),gridScale).y)))
+                            if (item.position.depth == 40 - ((activeLayer + 1) * 5))
                             {
-                                allowedToAdd = false;
-                                break;
+                                if (ChangeType(item.position).Contains(new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2(hScroll + grid.rect.left, 0), gridScale).x,
+                                                                                   grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll + grid.rect.top), gridScale).y)))
+                                {
+                                    allowedToAdd = false;
+                                    break;
+                                }
                             }
                         }
                         if(allowedToAdd)
                             {
                                 Debug.Log(lst5.getSelectedItemContent());
 
-                                level.objects.Add(new LevelObj(new Rect((grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll + grid.rect.left, 0),gridScale).x),
-                                                                      (grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll + grid.rect.top),gridScale).y),
+                                level.objects.Add(new LevelObj(new Rect((grid.FilterPosition(filteredMousePosition + new Vector2(hScroll + grid.rect.left, 0),gridScale).x),
+                                                                      (grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll + grid.rect.top),gridScale).y),
                                                                       grabbedObj.width,
                                                                       grabbedObj.height)
                                                              , Resources.Load<Texture>("Objects/" + lst5.getSelectedItemContent()), level.idAccumulator, 40 - ((activeLayer + 1) * 5)));
@@ -468,8 +497,8 @@ public class LevelCreatorWindow : EditorWindow
                     else
                     {
                         Debug.Log(lst5.getSelectedItemContent());
-                        level.objects.Add(new LevelObj(new Rect((grid.FilterPosition(filteredMousePosition+ new Vector2((int)hScroll + grid.rect.left, 0),gridScale).x),
-                                                              (grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll + grid.rect.top),gridScale).y),
+                        level.objects.Add(new LevelObj(new Rect((grid.FilterPosition(filteredMousePosition+ new Vector2(hScroll + grid.rect.left, 0),gridScale).x),
+                                                              (grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll + grid.rect.top),gridScale).y),
                                                               grabbedObj.width,
                                                               grabbedObj.height)
                                                        , Resources.Load<Texture>("Objects/" + lst5.getSelectedItemContent()), level.idAccumulator, 40 - ((activeLayer + 1) * 5)));
@@ -501,13 +530,13 @@ public class LevelCreatorWindow : EditorWindow
                                                  HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y);
                     if (grid.rect.Contains(filteredMousePosition))
                     {
-                        chunk.centerOfChunk = new ObjRect((grid.FilterPosition(filteredMousePosition).x/gridScale),
+                        chunk.centerOfChunk = new ObjRect((grid.FilterPosition(filteredMousePosition - new Vector2(vScroll, hScroll)).x / gridScale),
                                                             (grid.FilterPosition(filteredMousePosition).y/gridScale),
                                                             10, 10);
                         foreach (var chunkObject in chunk.objects)
                         {
-                            Rect tmpRect = new Rect((chunkObject.position.left - (int)hScroll + chunk.centerOfChunk.left) * gridScale,
-                                                    (chunkObject.position.top - (int)vScroll + chunk.centerOfChunk.top) * gridScale,
+                            Rect tmpRect = new Rect((chunkObject.position.left  + chunk.centerOfChunk.left) * gridScale,
+                                                    (chunkObject.position.top + chunk.centerOfChunk.top) * gridScale,
                                 chunkObject.position.width * gridScale,
                                 chunkObject.position.height * gridScale);
 
@@ -565,13 +594,15 @@ public class LevelCreatorWindow : EditorWindow
     {
         if (Event.current.alt)
         {
-            Vector2 filteredMousePosition = new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + (int)hScroll,
-                                                         HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y + (int)vScroll);
+            Vector2 filteredMousePosition = new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x - grid.rect.left,
+                                                         HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y - grid.rect.top);
+            filteredMousePosition /= gridScale;
+            
             if (Event.current.button == 1 && Event.current.isMouse)
             {
                 foreach (var item in level.objects)
                 {
-                    if (ChangeType(item.position).Contains(filteredMousePosition) && (item.position.depth == 40 - (activeLayer + 1) * 5))
+                    if (ChangeType(item.position).Contains(filteredMousePosition + new Vector2(hScroll + grid.rect.left, vScroll + grid.rect.top)) && (item.position.depth == 40 - (activeLayer + 1) * 5))
                     {
                         lst4.DeleteItem(new string[] { item.texture + "." + item.id.ToString() });
                         level.objects.Remove(item);
@@ -1018,14 +1049,14 @@ public class LevelCreatorWindow : EditorWindow
 
         
 
-        hScroll = GUI.HorizontalScrollbar(new Rect(180, 490, 800, 10), hScroll, grid.patchWidth, 0, level.width - grid.rect.width);
-        vScroll = GUI.VerticalScrollbar(new Rect(980, 90, 10, 400), vScroll, grid.patchHeight, 0, level.height - grid.rect.height);
+        hScroll = GUI.HorizontalScrollbar(new Rect(180, 490, 800, 10), hScroll, grid.patchWidth * gridScale, 0, level.width - grid.rect.width);
+        vScroll = GUI.VerticalScrollbar(new Rect(980, 90, 10, 400), vScroll, grid.patchHeight*gridScale, 0, level.height - grid.rect.height);
 
         vScroll = vScroll < 0 ? 0 : vScroll;
         hScroll = hScroll < 0 ? 0 : hScroll;
 
-        grid.xMin = -(int)hScroll;
-        grid.yMin = -(int)vScroll;
+        grid.xMin = -hScroll*gridScale;
+        grid.yMin = -vScroll*gridScale;
         
         grid.Draw();
         MoveChunk();
@@ -1043,8 +1074,8 @@ public class LevelCreatorWindow : EditorWindow
 
                         if (chunkObject.position.depth == 40 - ((activeLayer + 1) * 5))
                         {
-                            Rect tmpRect = new Rect((chunkObject.position.left + ((Chunk)item).centerOfChunk.left - grid.rect.left - (int)hScroll) * gridScale + grid.rect.left,
-                                                    (chunkObject.position.top + ((Chunk)item).centerOfChunk.top - grid.rect.top - (int)vScroll) * gridScale + grid.rect.top,
+                            Rect tmpRect = new Rect((chunkObject.position.left + ((Chunk)item).centerOfChunk.left - grid.rect.left - hScroll) * gridScale + grid.rect.left,
+                                                    (chunkObject.position.top + ((Chunk)item).centerOfChunk.top - grid.rect.top - vScroll) * gridScale + grid.rect.top,
                                                     chunkObject.position.width * gridScale,
                                                     chunkObject.position.height * gridScale);
                             if (!(tmpRect.xMin < grid.rect.xMin ||
@@ -1062,8 +1093,8 @@ public class LevelCreatorWindow : EditorWindow
             
             if (GetActiveLayer().Contains((40-item.position.depth)/5))
             {
-                Rect tmpRect = new Rect((((item.position.left - grid.rect.left - (int)hScroll) * gridScale) + grid.rect.left),
-                                        (((item.position.top - grid.rect.top - (int)vScroll) * gridScale) + grid.rect.top),
+                Rect tmpRect = new Rect((((item.position.left - grid.rect.left - hScroll) * gridScale) + grid.rect.left),
+                                        (((item.position.top - grid.rect.top - vScroll) * gridScale) + grid.rect.top),
                                         item.position.width * gridScale,
                                         item.position.height * gridScale);
                 if (!(tmpRect.xMin < grid.rect.xMin ||
@@ -1078,10 +1109,10 @@ public class LevelCreatorWindow : EditorWindow
         {
             if (item.position.depth == 40 - ((activeLayer + 1) * 5))
             {
-                Rect tmpRect = new Rect((item.position.left - (int)hScroll + (dynamicSelection.boundry.xMin - dynamicSelection.firstPos.x)) * gridScale,
-                         (item.position.top - (int)vScroll + (dynamicSelection.boundry.yMin - dynamicSelection.firstPos.y)) * gridScale,
-                         item.position.width * gridScale,
-                         item.position.height * gridScale);
+                Rect tmpRect = new Rect(((item.position.left - hScroll - grid.rect.left) * gridScale) + grid.rect.left + (dynamicSelection.boundry.xMin - dynamicSelection.firstPos.x),
+                                        ((item.position.top - vScroll - grid.rect.top) * gridScale) + grid.rect.top    + (dynamicSelection.boundry.yMin - dynamicSelection.firstPos.y),
+                                        item.position.width * gridScale,
+                                        item.position.height * gridScale);
                 if (!(tmpRect.xMin < grid.rect.xMin ||
                      tmpRect.yMin < grid.rect.yMin ||
                      tmpRect.xMax > grid.rect.xMax ||
@@ -1090,8 +1121,8 @@ public class LevelCreatorWindow : EditorWindow
             }
         }
 
-        Rect tmpR = new Rect((objSelectorGrid.position.left - (int)hScroll) * gridScale,
-                             (objSelectorGrid.position.top - (int)vScroll)* gridScale,
+        Rect tmpR = new Rect(((objSelectorGrid.position.left - hScroll - grid.rect.left) * gridScale) + grid.rect.left,
+                             ((objSelectorGrid.position.top -  grid.rect.top - vScroll)* gridScale) + grid.rect.top,
                              objSelectorGrid.position.width * gridScale,
                              objSelectorGrid.position.height * gridScale);
         if (!(tmpR.xMin < grid.rect.xMin ||

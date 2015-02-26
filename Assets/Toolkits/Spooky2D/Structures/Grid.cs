@@ -10,8 +10,8 @@ public class Grid
 	public Rect rect;
 	public int contentWidth;
 	public int contentHeight;
-	public int xMin;
-	public int yMin;
+	public float xMin;
+	public float yMin;
 	GUIContent content;
 	public Grid(int contentWidth, 
 	            int contentHeight , 
@@ -35,7 +35,6 @@ public class Grid
 		position = new Vector2 (position.x - rect.xMin, position.y - rect.yMin);
         float fixedPosX = (Mathf.FloorToInt(position.x / (patchWidth / gridScale)) * (patchWidth / gridScale));
         float fixedPosY = (Mathf.FloorToInt(position.y / (patchHeight / gridScale)) * (patchHeight / gridScale));
-        Debug.Log(patchHeight);
         return new Vector2 (fixedPosX + rect.xMin, fixedPosY + rect.yMin);
         
 	}
