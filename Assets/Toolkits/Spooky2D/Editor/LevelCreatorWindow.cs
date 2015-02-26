@@ -170,8 +170,8 @@ public class LevelCreatorWindow : EditorWindow
                 
             }
         }
-        dynamicSelection.drawRect = new Rect(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + hScroll,
-                          HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y + vScroll, 0, 0);
+        dynamicSelection.drawRect = new Rect(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + hScroll*gridScale,
+                                             HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y + vScroll * gridScale, 0, 0);
         if (dynamicSelection.isClonning)
             level.objects.AddRange(dynamicSelection.objects);
         dynamicSelection.objects = new List<LevelObj>();
@@ -189,8 +189,8 @@ public class LevelCreatorWindow : EditorWindow
             {
                 dynamicSelection.drawRect = new Rect(dynamicSelection.drawRect.xMin,
                                                      dynamicSelection.drawRect.yMin,
-                                                     HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + hScroll - dynamicSelection.drawRect.xMin,
-                                                     HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y + vScroll - dynamicSelection.drawRect.yMin);
+                                                     HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + hScroll*gridScale - dynamicSelection.drawRect.xMin,
+                                                     HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y + vScroll*gridScale - dynamicSelection.drawRect.yMin);
 
 
             }
@@ -206,7 +206,7 @@ public class LevelCreatorWindow : EditorWindow
                 foreach (LevelObj item in level.objects)
                 {
                     if (dynamicSelection.drawRect.Contains(new Vector2((item.position.left - grid.rect.left) * gridScale + grid.rect.left,
-                                                                       (item.position.top - grid.rect.top)*gridScale + grid.rect.top)) 
+                                                                       (item.position.top   - grid.rect.top) * gridScale + grid.rect.top )) 
                                                             && ( GetActiveLayer().Contains((40 -item.position.depth)/5)))
                     {
                         dynamicSelection.objects.Add(item);
@@ -215,7 +215,7 @@ public class LevelCreatorWindow : EditorWindow
                         {
                             dynamicSelection.boundry = ChangeType(item.position);
                             dynamicSelection.boundry = new Rect((dynamicSelection.boundry.left - grid.rect.left) * gridScale + grid.rect.left,
-                                                                 (dynamicSelection.boundry.top - grid.rect.top) * gridScale + grid.rect.top,
+                                                                 (dynamicSelection.boundry.top - grid.rect.top) * gridScale + grid.rect.top ,
                                                                  dynamicSelection.boundry.width * gridScale,
                                                                  dynamicSelection.boundry.height * gridScale);
                         }
@@ -226,7 +226,7 @@ public class LevelCreatorWindow : EditorWindow
                             dynamicSelection.boundry.yMin = Mathf.Min(dynamicSelection.boundry.yMin, ((ChangeType(item.position).yMin - grid.rect.top) * gridScale) + grid.rect.top);
                             dynamicSelection.boundry.yMax = Mathf.Max(dynamicSelection.boundry.yMax, ((ChangeType(item.position).yMax - grid.rect.top) * gridScale) + grid.rect.top);
                         }
-                        dynamicSelection.firstPos = new Vector2(dynamicSelection.boundry.xMin, dynamicSelection.boundry.yMin);
+                        dynamicSelection.firstPos = new Vector2(dynamicSelection.boundry.xMin , dynamicSelection.boundry.yMin);
                     }
                 }
 
@@ -244,8 +244,10 @@ public class LevelCreatorWindow : EditorWindow
         }
         else if (Event.current.type == EventType.mouseDrag)
         {
-            Vector2 tmpV = grid.FilterPosition(new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x ,
-                                                            HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y ));
+
+
+            Vector2 tmpV = grid.FilterPosition(new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + hScroll*gridScale,
+                                                            HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y + vScroll*gridScale ));
             dynamicSelection.boundry = new Rect(tmpV.x,
                                                 tmpV.y,
                                                 dynamicSelection.drawRect.width,
@@ -318,8 +320,8 @@ public class LevelCreatorWindow : EditorWindow
             else
                 dynamicSelection.drawRect = new Rect();
         }
-        Rect tmpR = new Rect(dynamicSelection.drawRect.xMin - hScroll,
-                                    dynamicSelection.drawRect.yMin - vScroll,
+        Rect tmpR = new Rect(dynamicSelection.drawRect.xMin - hScroll * gridScale,
+                                    dynamicSelection.drawRect.yMin - vScroll * gridScale,
                                     dynamicSelection.drawRect.width,
                                     dynamicSelection.drawRect.height);
         if (!(tmpR.xMin < grid.rect.xMin ||
@@ -832,7 +834,7 @@ public class LevelCreatorWindow : EditorWindow
     {
         noChangesApplied = true;
         grid = new Grid(level.width, level.height, new Rect(180, 90, 800, 400),
-                        (int)lastGrabbedObjScale.x, (int)lastGrabbedObjScale.y);
+                        grid.patchWidth , grid.patchHeight );
         if (Camera.main.GetComponent<SoundController>() != null)
             Camera.main.GetComponent<SoundController>().startFrom = float.Parse(TimeSpan);
 

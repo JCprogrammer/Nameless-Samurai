@@ -16,8 +16,8 @@ public class Grid
 	public Grid(int contentWidth, 
 	            int contentHeight , 
 	            Rect initiationPosition, 
-	            int patchWidth, 
-	            int patchHeight)
+	            float patchWidth, 
+	            float patchHeight)
 	{
 		this.patchHeight = patchHeight;
 		this.patchWidth = patchWidth;
