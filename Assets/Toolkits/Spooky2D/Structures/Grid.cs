@@ -40,7 +40,7 @@ public class Grid
 	}
 	public void Draw()
 	{
-		GUI.color = new Color(1,1,1,0.3f);
+		GUI.color = new Color(1,1,1,0.1f);
 		GUI.Box(rect,
 		        content);
 		for (float i = 0; i < contentWidth; i += patchWidth)

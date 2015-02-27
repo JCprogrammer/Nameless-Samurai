@@ -9,7 +9,7 @@ public class ObjRect
 	public float top;
 	public int width;
 	public int height;
-	public int depth;
+	public float depth;
 
 	public ObjRect(float left, float top,int width,int height)
 	{
@@ -19,7 +19,7 @@ public class ObjRect
 		this.height = height;
 		depth = 0;
 	}
-    public ObjRect(float left, float top, int width, int height , int depth) : this(left,top,width,height)
+    public ObjRect(float left, float top, int width, int height , float depth) : this(left,top,width,height)
     {
         this.depth = depth;
     }
@@ -54,7 +54,7 @@ public class LevelObj
 	public ObjRect position;
 	public int id;
     public string isCloneOf;
-    public LevelObj(Rect position,int depth,int id,string parentName = "none")
+    public LevelObj(Rect position,float depth,int id,string parentName = "none")
     {
         texture = null;
         this.position = new ObjRect(0, 0, 0, 0);
@@ -66,7 +66,7 @@ public class LevelObj
         this.id = id;
         this.isCloneOf = parentName;
     }
-	public LevelObj(Rect position, Texture texture,int id,int depth,string parentName = "none"): 
+	public LevelObj(Rect position, Texture texture,int id,float depth,string parentName = "none"): 
         this(position,depth,id,parentName)
 	{
 		this.texture = texture.name;

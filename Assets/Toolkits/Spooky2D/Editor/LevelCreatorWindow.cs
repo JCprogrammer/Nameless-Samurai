@@ -166,7 +166,7 @@ public class LevelCreatorWindow : EditorWindow
                                                 item.position.top +  (dynamicSelection.boundry.yMin - dynamicSelection.firstPos.y)/gridScale,
                                                 item.position.width,
                                                 item.position.height,
-                                                40 - ((activeLayer + 1) * 5));
+                                                item.position.depth);
                 
             }
         }
@@ -207,7 +207,7 @@ public class LevelCreatorWindow : EditorWindow
                 {
                     if (dynamicSelection.drawRect.Contains(new Vector2((item.position.left - grid.rect.left) * gridScale + grid.rect.left,
                                                                        (item.position.top   - grid.rect.top) * gridScale + grid.rect.top )) 
-                                                            && ( GetActiveLayer().Contains((40 -item.position.depth)/5)))
+                                                            && ( GetActiveLayer().Contains((40 -(int)item.position.depth)/5)))
                     {
                         dynamicSelection.objects.Add(item);
 
@@ -576,7 +576,7 @@ public class LevelCreatorWindow : EditorWindow
                                                             ((item.position.top) ),
                                                             item.position.width, item.position.height),
                             Resources.Load<Texture>("Objects/" + item.texture),
-                            item.id, chunk.layerNumber));        
+                            item.id, item.position.depth + 40 - ((activeLayer + 1) * 5)));        
 	                }
                     level.objects.Add(new Chunk("[chunk]" + chunk.Name, new Rect(), level.idAccumulator, 40 - ((activeLayer + 1) * 5), objBuffer));
                     
@@ -1074,7 +1074,8 @@ public class LevelCreatorWindow : EditorWindow
                     foreach (var chunkObject in ((Chunk)item).objects)
                     {
 
-                        if (chunkObject.position.depth == 40 - ((activeLayer + 1) * 5))
+                        //if (chunkObject.position.depth == 40 - ((activeLayer + 1) * 5))
+                        if(true)
                         {
                             Rect tmpRect = new Rect((chunkObject.position.left + ((Chunk)item).centerOfChunk.left - grid.rect.left - hScroll) * gridScale + grid.rect.left,
                                                     (chunkObject.position.top + ((Chunk)item).centerOfChunk.top - grid.rect.top - vScroll) * gridScale + grid.rect.top,
@@ -1093,7 +1094,7 @@ public class LevelCreatorWindow : EditorWindow
             }
             
             
-            if (GetActiveLayer().Contains((40-item.position.depth)/5))
+            if (GetActiveLayer().Contains((40-(int)item.position.depth)/5))
             {
                 Rect tmpRect = new Rect((((item.position.left - grid.rect.left - hScroll) * gridScale) + grid.rect.left),
                                         (((item.position.top - grid.rect.top - vScroll) * gridScale) + grid.rect.top),
@@ -1109,7 +1110,7 @@ public class LevelCreatorWindow : EditorWindow
 
         foreach (var item in dynamicSelection.objects)
         {
-            if (item.position.depth == 40 - ((activeLayer + 1) * 5))
+            if (GetActiveLayer().Contains((40 - (int)item.position.depth) / 5))
             {
                 Rect tmpRect = new Rect(((item.position.left - hScroll - grid.rect.left) * gridScale) + grid.rect.left + (dynamicSelection.boundry.xMin - dynamicSelection.firstPos.x),
                                         ((item.position.top - vScroll - grid.rect.top) * gridScale) + grid.rect.top    + (dynamicSelection.boundry.yMin - dynamicSelection.firstPos.y),
@@ -1140,11 +1141,11 @@ public class LevelCreatorWindow : EditorWindow
             GUI.DrawTexture(new Rect(585, 10, 60 * (selectedBlock.width / max), 60 * (selectedBlock.height / max)), selectedBlock);
             GUI.Label(new Rect(585, 73, 100, 20), selectedBlock.width + " X " + selectedBlock.height );
         }
+
         List<int> selectedLayers = GetActiveLayer();
         int tempLayerNum =  GUI.SelectionGrid(new Rect(655, 10, 340, 60), activeLayer, layersName, 5);
         activeLayer = tempLayerNum;
-        if(level.cameraPivot != null)
-        GUI.DrawTexture(ChangeType(level.cameraPivot), Resources.Load<Texture>("CameraPivot"));
+       
         for (int i = 0; i < layers.Length; i++)
         {
             if (i == activeLayer)
@@ -1159,6 +1160,9 @@ public class LevelCreatorWindow : EditorWindow
                 layers[i] = false;
             }
         }
+
+        if (level.cameraPivot != null)
+            GUI.DrawTexture(ChangeType(level.cameraPivot), Resources.Load<Texture>("CameraPivot"));
         MovingCamera();
         TimeBar();
         AssociativeSeletion();

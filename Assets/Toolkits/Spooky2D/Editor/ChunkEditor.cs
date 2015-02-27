@@ -35,6 +35,7 @@ public class ChuckEditor : EditorWindow
     bool movingCenterOfChunk;
     bool autoAdjustCOC;
     string[] layersName;
+    int activeLayer;
     Rect seekerBoundry = new Rect(180, 85, 20, 22);
     public static List<ComponentGroup> serializedObjects;
     [MenuItem("Spooky Guys/Chunk Editor")]
@@ -71,11 +72,33 @@ public class ChuckEditor : EditorWindow
         {
             item.action = window.changeSelectedBlockTexture;
         }
+
+        window.layers = new bool[10];
+        window.layers[0] = true;
+        window.layersName = new string[]{"L1",
+										 "L2",
+										 "L3",
+										 "L4",
+										 "L5",
+										 "L6",
+										 "L7",
+										 "L8",
+										 "L9",
+										 "L10"};
         window.SelectItemOnScene("");
         window.wantsMouseMove = true;
         window.changeSelectedBlockTexture("");
     }
-
+    public List<int> GetActiveLayer()
+    {
+        List<int> buffer = new List<int>();
+        for (int i = 0; i < layers.Length; i++)
+            if (layers[i])
+            {
+                buffer.Add(i + 1);
+            }
+        return buffer;
+    }
     void MovingCOC()
     {
         if (movingCenterOfChunk)
@@ -105,7 +128,7 @@ public class ChuckEditor : EditorWindow
                 item.position = new ObjRect(item.position.left + (int)(dynamicSelection.boundry.xMin - dynamicSelection.firstPos.x),
                     item.position.top + (int)(dynamicSelection.boundry.yMin - dynamicSelection.firstPos.y),
                     item.position.width,
-                    item.position.height);
+                    item.position.height, item.position.depth);
             }
         }
         dynamicSelection.drawRect = new Rect(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + (int)hScroll,
@@ -143,22 +166,25 @@ public class ChuckEditor : EditorWindow
                 dynamicSelection.drawRect.yMax = max;
                 foreach (LevelObj item in chunk.objects)
                 {
-                    if (dynamicSelection.drawRect.Contains(new Vector2(item.position.left, item.position.top)))
+                    if (item.position.depth == ((activeLayer + 1) * 0.5f))
                     {
-                        dynamicSelection.objects.Add(item);
+                        if (dynamicSelection.drawRect.Contains(new Vector2(item.position.left, item.position.top)))
+                        {
+                            dynamicSelection.objects.Add(item);
 
-                        if (dynamicSelection.objects.Count == 1)
-                        {
-                            dynamicSelection.boundry = ChangeType(item.position);
+                            if (dynamicSelection.objects.Count == 1)
+                            {
+                                dynamicSelection.boundry = ChangeType(item.position);
+                            }
+                            else if (dynamicSelection.objects.Count > 1)
+                            {
+                                dynamicSelection.boundry.xMin = Mathf.Min(dynamicSelection.boundry.xMin, ChangeType(item.position).xMin);
+                                dynamicSelection.boundry.xMax = Mathf.Max(dynamicSelection.boundry.xMax, ChangeType(item.position).xMax);
+                                dynamicSelection.boundry.yMin = Mathf.Min(dynamicSelection.boundry.yMin, ChangeType(item.position).yMin);
+                                dynamicSelection.boundry.yMax = Mathf.Max(dynamicSelection.boundry.yMax, ChangeType(item.position).yMax);
+                            }
+                            dynamicSelection.firstPos = new Vector2(dynamicSelection.boundry.xMin, dynamicSelection.boundry.yMin);
                         }
-                        else if (dynamicSelection.objects.Count > 1)
-                        {
-                            dynamicSelection.boundry.xMin = Mathf.Min(dynamicSelection.boundry.xMin, ChangeType(item.position).xMin);
-                            dynamicSelection.boundry.xMax = Mathf.Max(dynamicSelection.boundry.xMax, ChangeType(item.position).xMax);
-                            dynamicSelection.boundry.yMin = Mathf.Min(dynamicSelection.boundry.yMin, ChangeType(item.position).yMin);
-                            dynamicSelection.boundry.yMax = Mathf.Max(dynamicSelection.boundry.yMax, ChangeType(item.position).yMax);
-                        }
-                        dynamicSelection.firstPos = new Vector2(dynamicSelection.boundry.xMin, dynamicSelection.boundry.yMin);
                     }
                 }
 
@@ -318,13 +344,19 @@ public class ChuckEditor : EditorWindow
                 }
                 else if (Event.current.button == 0 && Event.current.type == EventType.mouseDrag)
                 {
-                    if (chunk.objects.Count > 0)
+                    if (dynamicSelection.objects.Count == 0)
                     {
-                        Vector2 grabbedPosition = new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll, 0)).x,
-                                              grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll)).y);
-                        selectedLevelObj.position = new ObjRect((int)grabbedPosition.x, (int)grabbedPosition.y, selectedLevelObj.position.width, selectedLevelObj.position.height, chunk.layerNumber);
+                        if (selectedLevelObj != null)
+                        {
+                            if (chunk.objects.Count > 0)
+                            {
+                                Vector2 grabbedPosition = new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll, 0)).x,
+                                                      grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll)).y);
+                                selectedLevelObj.position = new ObjRect((int)grabbedPosition.x, (int)grabbedPosition.y, selectedLevelObj.position.width, selectedLevelObj.position.height, chunk.layerNumber);
 
-                        SelectItemOnScene("");
+                                SelectItemOnScene("");
+                            }
+                        }
                     }
                 }
             }
@@ -361,7 +393,7 @@ public class ChuckEditor : EditorWindow
                                                                   grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)(vScroll ))).y,
                                                                   grabbedObj.width,
                                                                   grabbedObj.height)
-                                                         , Resources.Load<Texture>("Objects/" + TextureList.getSelectedItemContent()), chunk.idAccumulator, chunk.layerNumber));
+                                                         , Resources.Load<Texture>("Objects/" + TextureList.getSelectedItemContent()), chunk.idAccumulator,  ((activeLayer + 1) * 0.5f)));
                             ChunkItemList.Additem(new string[] { chunk.objects[chunk.objects.Count - 1].texture + "." + chunk.idAccumulator.ToString() });
                             chunk.idAccumulator++;
                         }
@@ -373,7 +405,7 @@ public class ChuckEditor : EditorWindow
                                                               grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)(vScroll ))).y,
                                                               grabbedObj.width,
                                                               grabbedObj.height)
-                                                       , Resources.Load<Texture>("Objects/" + TextureList.getSelectedItemContent()), chunk.idAccumulator, chunk.layerNumber));
+                                                       , Resources.Load<Texture>("Objects/" + TextureList.getSelectedItemContent()), chunk.idAccumulator,  ((activeLayer + 1) * 0.5f)));
                         TextureList.Additem(new string[] { chunk.objects[0].texture + "." + chunk.idAccumulator.ToString() });
                         chunk.idAccumulator++;
                     }
@@ -437,7 +469,8 @@ public class ChuckEditor : EditorWindow
             item.position = new ObjRect(item.position.left - chunk.centerOfChunk.left,
                                         item.position.top - chunk.centerOfChunk.top,
                                         item.position.width,
-                                        item.position.height);
+                                        item.position.height,
+                                        item.position.depth);
         }
         chunk.isSaved = true;
         CubeFile.SerializeObject<Chunk>(chunk.Name, chunk,"Chunks/");
@@ -466,7 +499,7 @@ public class ChuckEditor : EditorWindow
                 item.position = new ObjRect(item.position.left + chunk.centerOfChunk.left,
                                             item.position.top + chunk.centerOfChunk.top,
                                             item.position.width,
-                                            item.position.height);
+                                            item.position.height,item.position.depth);
             }
 
             RefreshEditor();
@@ -632,21 +665,36 @@ public class ChuckEditor : EditorWindow
 
         grid.xMin = -(int)hScroll;
         grid.yMin = -(int)vScroll;
-        
+
         foreach (var item in chunk.objects)
         {
             if (dynamicSelection.objects.Contains(item))
                 continue;
-           
-            Rect tmpRect = new Rect(item.position.left - (int)(hScroll )  ,
-                                    item.position.top - (int)(vScroll ),
-                     item.position.width,
-                     item.position.height);
-            if (!(tmpRect.xMin < grid.rect.xMin ||
-                 tmpRect.yMin < grid.rect.yMin ||
-                 tmpRect.xMax > grid.rect.xMax ||
-                 tmpRect.yMax > grid.rect.yMax))
-                GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+            if (item.position.depth == ((activeLayer + 1) * 0.5f))
+            {
+                Rect tmpRect = new Rect(item.position.left - (int)(hScroll),
+                                        item.position.top - (int)(vScroll),
+                         item.position.width,
+                         item.position.height);
+                if (!(tmpRect.xMin < grid.rect.xMin ||
+                     tmpRect.yMin < grid.rect.yMin ||
+                     tmpRect.xMax > grid.rect.xMax ||
+                     tmpRect.yMax > grid.rect.yMax))
+                    GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+            }
+
+            if (GetActiveLayer().Contains((int)((item.position.depth) / 0.5f)))
+            {
+                Rect tmpRect = new Rect((item.position.left - hScroll),
+                                        (item.position.top - vScroll) ,
+                                        item.position.width,
+                                        item.position.height);
+                if (!(tmpRect.xMin < grid.rect.xMin ||
+                     tmpRect.yMin < grid.rect.yMin ||
+                     tmpRect.xMax > grid.rect.xMax ||
+                     tmpRect.yMax > grid.rect.yMax))
+                    GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+            }
         }
         Rect tmpR = new Rect(); 
         //if(movingCenterOfChunk)
@@ -668,17 +716,20 @@ public class ChuckEditor : EditorWindow
 
         foreach (var item in dynamicSelection.objects)
         {
-            //if (item.position.depth == 40 - (GetActiveLayer() * 5))
-            //{
-            Rect tmpRect = new Rect(item.position.left - (int)hScroll + (dynamicSelection.boundry.xMin - dynamicSelection.firstPos.x),
-                     item.position.top - (int)vScroll + (dynamicSelection.boundry.yMin - dynamicSelection.firstPos.y),
-                     item.position.width,
-                     item.position.height);
-            if (!(tmpRect.xMin < grid.rect.xMin ||
-                 tmpRect.yMin < grid.rect.yMin ||
-                 tmpRect.xMax > grid.rect.xMax ||
-                 tmpRect.yMax > grid.rect.yMax))
-                GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+            if (GetActiveLayer().Contains((int)((item.position.depth) / 0.5f)))
+            {
+                Rect tmpRect = new Rect(item.position.left - (int)hScroll + (dynamicSelection.boundry.xMin - dynamicSelection.firstPos.x),
+                         item.position.top - (int)vScroll + (dynamicSelection.boundry.yMin - dynamicSelection.firstPos.y),
+                         item.position.width,
+                         item.position.height);
+                if (!(tmpRect.xMin < grid.rect.xMin ||
+                     tmpRect.yMin < grid.rect.yMin ||
+                     tmpRect.xMax > grid.rect.xMax ||
+                     tmpRect.yMax > grid.rect.yMax))
+                    GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+            }
+
+          
         }
 
         Rect tmpR2 = new Rect(objSelectorGrid.position.left - (int)hScroll,
@@ -697,7 +748,26 @@ public class ChuckEditor : EditorWindow
         if (selectedBlock != null)
             GUI.DrawTexture(new Rect(585, 10, 60, 60), selectedBlock);
         MovingCOC();
-        Debug.Log(movingCenterOfChunk);
+
+        List<int> selectedLayers = GetActiveLayer();
+        int tempLayerNum = GUI.SelectionGrid(new Rect(215, 520, 340, 60), activeLayer, layersName, 5);
+        activeLayer = tempLayerNum;
+
+        for (int i = 0; i < layers.Length; i++)
+        {
+            if (i == activeLayer)
+            {
+                layers[i] = true;
+                layersName[i] = "#L" + (i + 1).ToString();
+                continue;
+            }
+            if (!Event.current.control)
+            {
+                layersName[i] = "L" + (i + 1).ToString();
+                layers[i] = false;
+            }
+        }
+
         grid.Draw();
         AssociativeSeletion();
         window.Repaint();
