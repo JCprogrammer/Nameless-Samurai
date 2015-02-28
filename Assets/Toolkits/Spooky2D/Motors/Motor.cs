@@ -54,8 +54,8 @@ public class Motor : MonoBehaviour
     public void MotoUpdate()
     {
         //timeStep = 1.0f / GlobalVariables.framePerSecond;
-        RoundPerTimeStep();
-        //Cycle();
+        //RoundPerTimeStep();
+        Cycle();
     }
     void RoundPerTimeStep()
     {

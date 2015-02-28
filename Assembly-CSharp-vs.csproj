@@ -56,6 +56,7 @@
      <Compile Include="Assets\Samurai Menu Sources\Size_Adjust.cs" />
      <Compile Include="Assets\Samurai Menu Sources\Tutorial.cs" />
      <Compile Include="Assets\Scripts\AttackMechanic.cs" />
+     <Compile Include="Assets\Scripts\ChunkGenerator.cs" />
      <Compile Include="Assets\Scripts\Samurai\ChunkGenerator.cs" />
      <Compile Include="Assets\Scripts\Samurai\Enemy.cs" />
      <Compile Include="Assets\Scripts\Samurai\GarbageObjects.cs" />

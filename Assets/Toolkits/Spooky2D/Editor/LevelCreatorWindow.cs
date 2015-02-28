@@ -424,24 +424,13 @@ public class LevelCreatorWindow : EditorWindow
                                                            (grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll + grid.rect.top), gridScale).y));
 
                         selectedLevelObj.position = new ObjRect(grabbedPosition.x, grabbedPosition.y, selectedLevelObj.position.width, selectedLevelObj.position.height, 40 - ((activeLayer + 1) * 5));
-                        Debug.Log("dragging");
                         SelectItemOnScene("");
                     }
-                    else
-                    {
-                        Debug.Log("not dragging");
-                    }
+                    
                 }
-                else
-                {
-                    Debug.Log("not dragging");
-                }
+         
             }
 
-        }
-        else
-        {
-            Debug.Log("its not in rect");
         }
     }
     void AddItem()
@@ -604,6 +593,18 @@ public class LevelCreatorWindow : EditorWindow
             {
                 foreach (var item in level.objects)
                 {
+                    if (item is Chunk)
+                    {
+                        if (ChangeType(((Chunk)item).centerOfChunk).Contains(filteredMousePosition + new Vector2(hScroll + grid.rect.left, vScroll + grid.rect.top)) && (item.position.depth == 40 - (activeLayer + 1) * 5))
+                        {
+                            lst4.DeleteItem(new string[] { "." + item.id.ToString() });
+                            level.objects.Remove(item);
+                            deletedItems.Add(((Chunk)item).Name + "." + item.id.ToString());
+                            Debug.Log(((Chunk)item).Name);
+                            window.Repaint();
+                            return;
+                        }
+                    }
                     if (ChangeType(item.position).Contains(filteredMousePosition + new Vector2(hScroll + grid.rect.left, vScroll + grid.rect.top)) && (item.position.depth == 40 - (activeLayer + 1) * 5))
                     {
                         lst4.DeleteItem(new string[] { item.texture + "." + item.id.ToString() });
@@ -847,6 +848,11 @@ public class LevelCreatorWindow : EditorWindow
         string[] chunkItems = new string[level.objects.Count];
         for (int i = 0; i < chunkItems.Length; i++)
         {
+            if (level.objects[i] is Chunk)
+            {
+                chunkItems[i] = "[chunk]"+((Chunk)level.objects[i]).Name + "." + level.objects[i].id.ToString();
+                Debug.Log("asdas");
+            }
             chunkItems[i] = level.objects[i].texture + "." + level.objects[i].id.ToString();
         }
         lst4 = new Listbox(chunkItems, "LevelChunksHirarchy", new Rect(370, 530, 180, 140), 20);
@@ -1026,6 +1032,12 @@ public class LevelCreatorWindow : EditorWindow
         {
             foreach (var item in level.objects)
             {
+                if (item is Chunk)
+                {
+                    deletedItems.Add(((Chunk)item).Name + "." + item.id.ToString());
+                    continue;
+                }
+
                 deletedItems.Add(item.texture + "." + item.id.ToString());
             }
             level.objects.RemoveAll(x => { return true; });
@@ -1051,8 +1063,8 @@ public class LevelCreatorWindow : EditorWindow
 
         
 
-        hScroll = GUI.HorizontalScrollbar(new Rect(180, 490, 800, 10), hScroll, grid.patchWidth * gridScale, 0, level.width - grid.rect.width);
-        vScroll = GUI.VerticalScrollbar(new Rect(980, 90, 10, 400), vScroll, grid.patchHeight*gridScale, 0, level.height - grid.rect.height);
+        hScroll = GUI.HorizontalScrollbar(new Rect(180, 490, 800, 10), hScroll, grid.patchWidth , 0, level.width - grid.rect.width);
+        vScroll = GUI.VerticalScrollbar(new Rect(980, 90, 10, 400), vScroll, grid.patchHeight , 0, level.height - grid.rect.height);
 
         vScroll = vScroll < 0 ? 0 : vScroll;
         hScroll = hScroll < 0 ? 0 : hScroll;
@@ -1075,8 +1087,7 @@ public class LevelCreatorWindow : EditorWindow
                     {
 
                         //if (chunkObject.position.depth == 40 - ((activeLayer + 1) * 5))
-                        if(true)
-                        {
+                        
                             Rect tmpRect = new Rect((chunkObject.position.left + ((Chunk)item).centerOfChunk.left - grid.rect.left - hScroll) * gridScale + grid.rect.left,
                                                     (chunkObject.position.top + ((Chunk)item).centerOfChunk.top - grid.rect.top - vScroll) * gridScale + grid.rect.top,
                                                     chunkObject.position.width * gridScale,
@@ -1086,7 +1097,8 @@ public class LevelCreatorWindow : EditorWindow
                                  tmpRect.xMax > grid.rect.xMax ||
                                  tmpRect.yMax > grid.rect.yMax))
                                 GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + chunkObject.texture));
-                        }
+                            GUI.DrawTexture(ChangeType( ((Chunk)item).centerOfChunk), Resources.Load<Texture>("plus"));
+
 
                     }
                 }
