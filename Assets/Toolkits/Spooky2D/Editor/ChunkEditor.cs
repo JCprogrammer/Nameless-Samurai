@@ -58,17 +58,19 @@ public class ChuckEditor : EditorWindow
         {
             item.action = window.LoadChunk;
         }
-        foreach (var item in ChunkItemList.items)
-        {
-            item.action = window.SelectItemOnScene;
-        }
+       
+        //foreach (var item in ChunkItemList.items)
+        //{
+        //    item.action = window.SelectItemOnScene;
+        //}
         window.lastGrabbedObjScale = new Vector2(40, 40);
         window.deletedItems = new List<string>(0);
         window.grabbedObj = new Rect(0, 0, window.lastGrabbedObjScale.x, window.lastGrabbedObjScale.y);
-
         string[] availObjs = window.LoadAvailableObjects();
-         TextureList = new Listbox(availObjs, "AvailableObjects", new Rect(10, 110, 200, 140), 20);
-        foreach (var item in ChunkItemList.items)
+
+        TextureList = new Listbox(availObjs, "AvailableObjects", new Rect(10, 110, 200, 140), 20);
+        
+         foreach (var item in TextureList.items)
         {
             item.action = window.changeSelectedBlockTexture;
         }
@@ -292,9 +294,9 @@ public class ChuckEditor : EditorWindow
     }
     public void SelectItemOnScene(string item)
     {
-        if (ChunkItemList.items.Count > 0)
+        if (TextureList.items.Count > 0)
         {
-            string lst4SelectedItem = ChunkItemList.getSelectedItemContent();
+            string lst4SelectedItem = TextureList.getSelectedItemContent();
             Selection.activeGameObject = GameObject.Find(lst4SelectedItem);
             LevelObj obj = chunk.objects.Find(x =>
             {
@@ -632,7 +634,12 @@ public class ChuckEditor : EditorWindow
             CommitChanges();
 
         }
-
+        if (selectedBlock != null)
+        {
+            float max = Mathf.Max(selectedBlock.width, selectedBlock.height);
+            GUI.DrawTexture(new Rect(585, 10, 60 * (selectedBlock.width / max), 60 * (selectedBlock.height / max)), selectedBlock);
+            GUI.Label(new Rect(585, 73, 100, 20), selectedBlock.width + " X " + selectedBlock.height);
+        }
         if (GUI.Button(new Rect(10, 63, 100, 20), "Clear"))
         {
             foreach (var item in chunk.objects)
@@ -745,9 +752,7 @@ public class ChuckEditor : EditorWindow
             GUI.DrawTexture(tmpR2, Resources.Load<Texture>(objSelectorGrid.texture));
 
         GUI.DrawTexture(new Rect(225, 430, 50, 50), Resources.Load<Texture>("Coordinate"));
-        if (selectedBlock != null)
-            GUI.DrawTexture(new Rect(585, 10, 60, 60), selectedBlock);
-        MovingCOC();
+       MovingCOC();
 
         List<int> selectedLayers = GetActiveLayer();
         int tempLayerNum = GUI.SelectionGrid(new Rect(215, 520, 340, 60), activeLayer, layersName, 5);

@@ -5,7 +5,7 @@ public class GlobalVariables {
 	public const int minifier = 20;
 	public const double errorOnTime = 0.0199;
 	public static float deltaTime = 0.02f;
-	public static float deltaTimeConst = 0.004f;
+	public static float deltaTimeConst = 0.0027f;
 	public const float baseAccelerator = 40;
     public static float framePerSecond = 200;
 	//public const double deltaTime = 0.011313131313;

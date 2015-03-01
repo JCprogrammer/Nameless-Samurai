@@ -538,6 +538,8 @@ public class LevelCreatorWindow : EditorWindow
                                 GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + chunkObject.texture));
 
                         }
+                        GUI.DrawTexture(new Rect(chunk.centerOfChunk.left - 5, chunk.centerOfChunk.top - 5, 10, 10), Resources.Load<Texture>("plus"));
+
                     }
 
                 }
@@ -595,7 +597,7 @@ public class LevelCreatorWindow : EditorWindow
                 {
                     if (item is Chunk)
                     {
-                        if (ChangeType(((Chunk)item).centerOfChunk).Contains(filteredMousePosition + new Vector2(hScroll + grid.rect.left, vScroll + grid.rect.top)) && (item.position.depth == 40 - (activeLayer + 1) * 5))
+                        if ((new Rect(((Chunk)item).centerOfChunk.left - 5, ((Chunk)item).centerOfChunk.top - 5,10,10)).Contains(filteredMousePosition + new Vector2(hScroll + grid.rect.left, vScroll + grid.rect.top)) && (item.position.depth == 40 - (activeLayer + 1) * 5))
                         {
                             lst4.DeleteItem(new string[] { "." + item.id.ToString() });
                             level.objects.Remove(item);
@@ -707,9 +709,9 @@ public class LevelCreatorWindow : EditorWindow
             GameObject ChunkContainer = GameObject.Find(((Chunk)item).Name + "." + item.id.ToString());
             if(ChunkContainer == null)
                 ChunkContainer = new GameObject(((Chunk)item).Name + "." + item.id.ToString());
-            ChunkContainer.transform.position = new Vector3(1 * (float)(((Chunk)item).centerOfChunk.left)  /
+            ChunkContainer.transform.position = new Vector3(1 * (float)(((Chunk)item).centerOfChunk.left) /
                                                  GlobalVariables.minifier, -1 * (float)(((Chunk)item).centerOfChunk.top) /
-                                                 GlobalVariables.minifier, 0);
+                                                 GlobalVariables.minifier, 0) + new Vector3(20.0f/GlobalVariables.minifier,40.0f/GlobalVariables.minifier,item.position.depth);
             Debug.Log("Number of objects: " + ((Chunk)item).objects.Count + "Center of Chunk" + ((Chunk)item).centerOfChunk.top);
             foreach (var item2 in ((Chunk)item).objects)
             {
@@ -1097,10 +1099,11 @@ public class LevelCreatorWindow : EditorWindow
                                  tmpRect.xMax > grid.rect.xMax ||
                                  tmpRect.yMax > grid.rect.yMax))
                                 GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + chunkObject.texture));
-                            GUI.DrawTexture(ChangeType( ((Chunk)item).centerOfChunk), Resources.Load<Texture>("plus"));
-
+                            
 
                     }
+                    GUI.DrawTexture(new Rect(((Chunk)item).centerOfChunk.left - 5, ((Chunk)item).centerOfChunk.top - 5, 10, 10), Resources.Load<Texture>("plus"));
+
                 }
                 continue;
             }

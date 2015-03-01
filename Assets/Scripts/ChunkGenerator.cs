@@ -20,11 +20,7 @@ public class ChunkGenerator : Motor
     {
         
         base.Cycle();
-        Debug.Log("asdas");
-        if (isFadingIn)
-        {
-            Debug.Log("Chunk Generator Time: " + timeSinceIgnition);
-        }
+        
     }
 
     protected override void KillPower()
