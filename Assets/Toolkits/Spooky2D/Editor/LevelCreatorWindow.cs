@@ -432,6 +432,13 @@ public class LevelCreatorWindow : EditorWindow
             }
 
         }
+        else
+        {
+            if (Event.current.button == 0 && Event.current.type == EventType.mouseDown)
+            {
+                objSelectorGrid.position = new ObjRect(0, 0, 0, 0);
+            }
+        }
     }
     void AddItem()
     {
@@ -593,28 +600,33 @@ public class LevelCreatorWindow : EditorWindow
             
             if (Event.current.button == 1 && Event.current.isMouse)
             {
+
                 foreach (var item in level.objects)
                 {
-                    if (item is Chunk)
+                    if (item.position.depth == 40 - ((activeLayer + 1) * 5))
                     {
-                        if ((new Rect(((Chunk)item).centerOfChunk.left - 5, ((Chunk)item).centerOfChunk.top - 5,10,10)).Contains(filteredMousePosition + new Vector2(hScroll + grid.rect.left, vScroll + grid.rect.top)) && (item.position.depth == 40 - (activeLayer + 1) * 5))
+                        if (item is Chunk)
                         {
-                            lst4.DeleteItem(new string[] { "." + item.id.ToString() });
+                            if ((new Rect(((Chunk)item).centerOfChunk.left - 5, ((Chunk)item).centerOfChunk.top - 5, 10, 10)).Contains(filteredMousePosition + new Vector2(hScroll + grid.rect.left, vScroll + grid.rect.top)) && (item.position.depth == 40 - (activeLayer + 1) * 5))
+                            {
+                                lst4.DeleteItem(new string[] { "." + item.id.ToString() });
+                                level.objects.Remove(item);
+                                deletedItems.Add(((Chunk)item).Name + "." + item.id.ToString());
+                                Debug.Log(((Chunk)item).Name);
+                                window.Repaint();
+                                return;
+                            }
+                        }
+
+                        if (ChangeType(item.position).Contains(filteredMousePosition + new Vector2(hScroll + grid.rect.left, vScroll + grid.rect.top)) && (item.position.depth == 40 - (activeLayer + 1) * 5))
+                        {
+                            lst4.DeleteItem(new string[] { item.texture + "." + item.id.ToString() });
                             level.objects.Remove(item);
-                            deletedItems.Add(((Chunk)item).Name + "." + item.id.ToString());
-                            Debug.Log(((Chunk)item).Name);
+                            deletedItems.Add(item.texture + "." + item.id.ToString());
+
                             window.Repaint();
                             return;
                         }
-                    }
-                    if (ChangeType(item.position).Contains(filteredMousePosition + new Vector2(hScroll + grid.rect.left, vScroll + grid.rect.top)) && (item.position.depth == 40 - (activeLayer + 1) * 5))
-                    {
-                        lst4.DeleteItem(new string[] { item.texture + "." + item.id.ToString() });
-                        level.objects.Remove(item);
-                        deletedItems.Add(item.texture + "." + item.id.ToString());
-
-                        window.Repaint();
-                        return;
                     }
                 }
             }

@@ -87,7 +87,7 @@ public class ChuckEditor : EditorWindow
 										 "L8",
 										 "L9",
 										 "L10"};
-        window.SelectItemOnScene("");
+        
         window.wantsMouseMove = true;
         window.changeSelectedBlockTexture("");
     }
@@ -294,10 +294,9 @@ public class ChuckEditor : EditorWindow
     }
     public void SelectItemOnScene(string item)
     {
-        if (TextureList.items.Count > 0)
+        if (ChunkItemList.items.Count > 0)
         {
-            string lst4SelectedItem = TextureList.getSelectedItemContent();
-            Selection.activeGameObject = GameObject.Find(lst4SelectedItem);
+            string lst4SelectedItem = ChunkItemList.getSelectedItemContent();
             LevelObj obj = chunk.objects.Find(x =>
             {
                 return x.texture + "." + x.id == lst4SelectedItem;
@@ -354,15 +353,26 @@ public class ChuckEditor : EditorWindow
                             {
                                 Vector2 grabbedPosition = new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll, 0)).x,
                                                       grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll)).y);
-                                selectedLevelObj.position = new ObjRect((int)grabbedPosition.x, (int)grabbedPosition.y, selectedLevelObj.position.width, selectedLevelObj.position.height, chunk.layerNumber);
-
+                                selectedLevelObj.position = new ObjRect((int)grabbedPosition.x,
+                                                                        (int)grabbedPosition.y,
+                                                                            selectedLevelObj.position.width,
+                                                                            selectedLevelObj.position.height,
+                                                                            selectedLevelObj.position.depth);
                                 SelectItemOnScene("");
+
                             }
                         }
                     }
                 }
             }
 
+        }
+        else
+        {
+            if (Event.current.button == 0 && Event.current.type == EventType.mouseDown)
+            {
+                objSelectorGrid.position = new ObjRect(0, 0, 0, 0);
+            }
         }
     }
     void AddItem()
@@ -387,8 +397,21 @@ public class ChuckEditor : EditorWindow
                     if (chunk.objects.Count > 0)
                     {
 
-                        if (!ChangeType(chunk.objects[chunk.objects.Count - 1].position).Contains(new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll, 0)).x,
-                                                                                         grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll)).y)))
+                        bool allowedToAdd = true;
+                        foreach (var item in chunk.objects)
+                        {
+                            if (item.position.depth == ((activeLayer + 1) * 0.5f))
+                            {
+                                if (ChangeType(item.position).Contains(new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2(hScroll , 0)).x,
+                                                                                   grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll)).y)))
+                                {
+                                    allowedToAdd = false;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (allowedToAdd)
                         {
                             Debug.Log(TextureList.getSelectedItemContent());
                             chunk.objects.Add(new LevelObj(new Rect(grid.FilterPosition(filteredMousePosition + new Vector2((int)(hScroll ), 0)).x,
@@ -427,14 +450,17 @@ public class ChuckEditor : EditorWindow
             {
                 foreach (var item in chunk.objects)
                 {
-                    if (ChangeType(item.position).Contains(filteredMousePosition))
+                    if (item.position.depth == ((activeLayer + 1) * 0.5f))
                     {
-                        TextureList.DeleteItem(new string[] { item.texture + item.id.ToString() });
-                        chunk.objects.Remove(item);
-                        deletedItems.Add(item.texture + "." + item.id.ToString());
+                        if (ChangeType(item.position).Contains(filteredMousePosition))
+                        {
+                            ChunkItemList.DeleteItem(new string[] { item.texture + item.id.ToString() });
+                            chunk.objects.Remove(item);
+                            deletedItems.Add(item.texture + "." + item.id.ToString());
 
-                        window.Repaint();
-                        return;
+                            window.Repaint();
+                            return;
+                        }
                     }
                 }
             }
