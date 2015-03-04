@@ -72,6 +72,8 @@ public class LevelCreatorWindow : EditorWindow
     bool gridScaleChanged = false;
     public static List<ComponentGroup> serializedObjects;
 
+
+    
     [MenuItem("Spooky Guys/Level Editor")]
     static void Init()
     {
@@ -1123,15 +1125,66 @@ public class LevelCreatorWindow : EditorWindow
             
             if (GetActiveLayer().Contains((40-(int)item.position.depth)/5))
             {
-                Rect tmpRect = new Rect((((item.position.left - grid.rect.left - hScroll) * gridScale) + grid.rect.left),
+                Rect txCords = new Rect(0,0,1,1);
+                Rect tmpRect = new Rect( (((item.position.left - grid.rect.left - hScroll) * gridScale) + grid.rect.left),
                                         (((item.position.top - grid.rect.top - vScroll) * gridScale) + grid.rect.top),
                                         item.position.width * gridScale,
                                         item.position.height * gridScale);
-                if (!(tmpRect.xMin < grid.rect.xMin ||
-                     tmpRect.yMin < grid.rect.yMin ||
-                     tmpRect.xMax > grid.rect.xMax ||
-                     tmpRect.yMax > grid.rect.yMax))
-                    GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+                if (tmpRect.xMax > grid.rect.xMax)
+                {
+                    float tmpRectWidth = tmpRect.width;
+                    tmpRect.width *= ((Mathf.Min(tmpRect.xMax, grid.rect.xMax) - Mathf.Max(tmpRect.xMin, grid.rect.xMin)) / tmpRect.width);
+                    txCords = new Rect(0,
+                        0.0f,
+                        (tmpRect.width / tmpRectWidth),
+                        1);
+                }
+                else if (tmpRect.xMin < grid.rect.xMin)
+                {
+
+                    float tmpRectWidth = tmpRect.width;
+                    float tmpRectXmin = tmpRect.xMin;
+                    tmpRect.xMin = grid.rect.xMin;
+                    
+                    
+                    tmpRect.width *= ((Mathf.Min(tmpRect.xMax, grid.rect.xMax) - Mathf.Max(tmpRect.xMin, grid.rect.xMin)) / tmpRect.width);
+                    txCords = new Rect(1 - ((Mathf.Min(tmpRect.xMax, grid.rect.xMax) - Mathf.Max(tmpRect.xMin, grid.rect.xMin)) / tmpRectWidth),
+                                       0.0f,
+                                       tmpRect.width/tmpRectWidth,
+                                       1);
+                    
+                }
+
+
+                if (tmpRect.yMax > grid.rect.yMax)
+                {
+                    float tmpRectHeight = tmpRect.height;
+                    tmpRect.height *= ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRect.height);
+                    txCords = new Rect(0,
+                        0.0f,
+                        txCords.width,
+                        (tmpRect.height / tmpRectHeight));
+                }
+
+                else if (tmpRect.yMin < grid.rect.yMin)
+                {
+
+                    float tmpRectHeight = tmpRect.height;
+                    float tmpRectYmin = tmpRect.yMin;
+                    tmpRect.yMin = grid.rect.yMin;
+
+
+                    tmpRect.height *= ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRect.height);
+                    txCords = new Rect(0,
+                                       1 - ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRectHeight),
+                                       txCords.width,
+                                       tmpRect.height / tmpRectHeight);
+
+                }
+                 if(!(tmpRect.xMin > grid.rect.xMax || tmpRect.xMax < grid.rect.xMin))
+                     if (!(tmpRect.yMin > grid.rect.yMax || tmpRect.yMax < grid.rect.yMin))
+                    GUI.DrawTextureWithTexCoords(tmpRect, Resources.Load<Texture>("Objects/" + item.texture),txCords);
+                
             }
         }
 
