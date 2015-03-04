@@ -38,6 +38,11 @@ public class ChuckEditor : EditorWindow
     int activeLayer;
     Rect seekerBoundry = new Rect(180, 85, 20, 22);
     public static List<ComponentGroup> serializedObjects;
+
+    float gridScale = 1;
+    Rect gridScalerRect;
+    bool gridScaleChanged = false;
+
     [MenuItem("Spooky Guys/Chunk Editor")]
     static void Init()
     {
@@ -58,7 +63,7 @@ public class ChuckEditor : EditorWindow
         {
             item.action = window.LoadChunk;
         }
-       
+        window.gridScalerRect = new Rect(715, 490, 20, 150);   
         //foreach (var item in ChunkItemList.items)
         //{
         //    item.action = window.SelectItemOnScene;
@@ -127,14 +132,16 @@ public class ChuckEditor : EditorWindow
             foreach (var item in dynamicSelection.objects)
             {
 
-                item.position = new ObjRect(item.position.left + (int)(dynamicSelection.boundry.xMin - dynamicSelection.firstPos.x),
-                    item.position.top + (int)(dynamicSelection.boundry.yMin - dynamicSelection.firstPos.y),
-                    item.position.width,
-                    item.position.height, item.position.depth);
+                item.position = new ObjRect(item.position.left + (dynamicSelection.boundry.xMin - dynamicSelection.firstPos.x) / gridScale,
+                                                  item.position.top + (dynamicSelection.boundry.yMin - dynamicSelection.firstPos.y) / gridScale,
+                                                  item.position.width,
+                                                  item.position.height,
+                                                  item.position.depth);
+                
             }
         }
-        dynamicSelection.drawRect = new Rect(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + (int)hScroll,
-                          HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y + (int)vScroll, 0, 0);
+        dynamicSelection.drawRect = new Rect(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + hScroll * gridScale,
+                                             HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y + vScroll * gridScale, 0, 0);
         if (dynamicSelection.isClonning)
             chunk.objects.AddRange(dynamicSelection.objects);
         dynamicSelection.objects = new List<LevelObj>();
@@ -152,8 +159,8 @@ public class ChuckEditor : EditorWindow
             {
                 dynamicSelection.drawRect = new Rect(dynamicSelection.drawRect.xMin,
                                                      dynamicSelection.drawRect.yMin,
-                                                     HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + (int)hScroll - dynamicSelection.drawRect.xMin,
-                                                     HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y + (int)vScroll - dynamicSelection.drawRect.yMin);
+                                                     HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + hScroll * gridScale - dynamicSelection.drawRect.xMin,
+                                                     HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y + vScroll * gridScale - dynamicSelection.drawRect.yMin);
 
 
             }
@@ -168,28 +175,31 @@ public class ChuckEditor : EditorWindow
                 dynamicSelection.drawRect.yMax = max;
                 foreach (LevelObj item in chunk.objects)
                 {
-                    if (item.position.depth == ((activeLayer + 1) * 0.5f))
+                    if (dynamicSelection.drawRect.Contains(new Vector2((item.position.left - grid.rect.left) * gridScale + grid.rect.left,
+                                                                       (item.position.top - grid.rect.top) * gridScale + grid.rect.top))
+                                                            && (GetActiveLayer().Contains((40 - (int)item.position.depth) / 5)))
                     {
-                        if (dynamicSelection.drawRect.Contains(new Vector2(item.position.left, item.position.top)))
-                        {
-                            dynamicSelection.objects.Add(item);
+                        dynamicSelection.objects.Add(item);
 
-                            if (dynamicSelection.objects.Count == 1)
-                            {
-                                dynamicSelection.boundry = ChangeType(item.position);
-                            }
-                            else if (dynamicSelection.objects.Count > 1)
-                            {
-                                dynamicSelection.boundry.xMin = Mathf.Min(dynamicSelection.boundry.xMin, ChangeType(item.position).xMin);
-                                dynamicSelection.boundry.xMax = Mathf.Max(dynamicSelection.boundry.xMax, ChangeType(item.position).xMax);
-                                dynamicSelection.boundry.yMin = Mathf.Min(dynamicSelection.boundry.yMin, ChangeType(item.position).yMin);
-                                dynamicSelection.boundry.yMax = Mathf.Max(dynamicSelection.boundry.yMax, ChangeType(item.position).yMax);
-                            }
-                            dynamicSelection.firstPos = new Vector2(dynamicSelection.boundry.xMin, dynamicSelection.boundry.yMin);
+                        if (dynamicSelection.objects.Count == 1)
+                        {
+                            dynamicSelection.boundry = ChangeType(item.position);
+                            dynamicSelection.boundry = new Rect((dynamicSelection.boundry.left - grid.rect.left) * gridScale + grid.rect.left,
+                                                                 (dynamicSelection.boundry.top - grid.rect.top) * gridScale + grid.rect.top,
+                                                                 dynamicSelection.boundry.width * gridScale,
+                                                                 dynamicSelection.boundry.height * gridScale);
+                        }
+                        else if (dynamicSelection.objects.Count > 1)
+                        {
+                            dynamicSelection.boundry.xMin = Mathf.Min(dynamicSelection.boundry.xMin, ((ChangeType(item.position).xMin - grid.rect.left) * gridScale) + grid.rect.left);
+                            dynamicSelection.boundry.xMax = Mathf.Max(dynamicSelection.boundry.xMax, ((ChangeType(item.position).xMax - grid.rect.left) * gridScale) + grid.rect.left);
+                            dynamicSelection.boundry.yMin = Mathf.Min(dynamicSelection.boundry.yMin, ((ChangeType(item.position).yMin - grid.rect.top) * gridScale) + grid.rect.top);
+                            dynamicSelection.boundry.yMax = Mathf.Max(dynamicSelection.boundry.yMax, ((ChangeType(item.position).yMax - grid.rect.top) * gridScale) + grid.rect.top);
+
                         }
                     }
                 }
-
+                     dynamicSelection.firstPos = new Vector2(dynamicSelection.boundry.xMin , dynamicSelection.boundry.yMin);
                 if (dynamicSelection.objects.Count > 0)
                 {
                     dynamicSelection.drawRect = dynamicSelection.boundry;
@@ -204,8 +214,11 @@ public class ChuckEditor : EditorWindow
         }
         else if (Event.current.type == EventType.mouseDrag)
         {
-            Vector2 tmpV = grid.FilterPosition(new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + (int)hScroll,
-                                   HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y + (int)vScroll));
+
+
+            Vector2 tmpV = grid.FilterPosition(new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x + hScroll * gridScale,
+                                                            HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y + vScroll * gridScale));
+
             dynamicSelection.boundry = new Rect(tmpV.x,
                                    tmpV.y, dynamicSelection.drawRect.width, dynamicSelection.drawRect.height);
 
@@ -272,8 +285,8 @@ public class ChuckEditor : EditorWindow
             else
                 dynamicSelection.drawRect = new Rect();
         }
-        Rect tmpR = new Rect(dynamicSelection.drawRect.xMin - (int)hScroll,
-                                    dynamicSelection.drawRect.yMin - (int)vScroll,
+        Rect tmpR = new Rect(dynamicSelection.drawRect.xMin - hScroll * gridScale,
+                                    dynamicSelection.drawRect.yMin - vScroll * gridScale,
                                     dynamicSelection.drawRect.width,
                                     dynamicSelection.drawRect.height);
         if (!(tmpR.xMin < grid.rect.xMin ||
@@ -318,7 +331,7 @@ public class ChuckEditor : EditorWindow
 
             Vector2 filteredMousePosition = new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x,
                                          HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y);
-            if (grid.rect.Contains(filteredMousePosition))
+            filteredMousePosition /= gridScale; if (grid.rect.Contains(filteredMousePosition * gridScale + new Vector2(grid.rect.left, grid.rect.top)))
             {
 
                 grabbedObj = new Rect(filteredMousePosition.x,
@@ -330,8 +343,8 @@ public class ChuckEditor : EditorWindow
                 {
                     if (chunk.objects.Count > 0)
                     {
-                        Vector2 grabbedPosition = new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll, 0)).x,
-                                              grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll)).y);
+                        Vector2 grabbedPosition = new Vector2((grid.FilterPosition(filteredMousePosition + new Vector2(hScroll + grid.rect.left, 0), gridScale).x),
+                                                              (grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll + grid.rect.top), gridScale).y));
                         foreach (LevelObj item in chunk.objects)
                         {
                             //if (item.position.left == grabbedPosition.x && item.position.top == grabbedPosition.y) {
@@ -351,8 +364,8 @@ public class ChuckEditor : EditorWindow
                         {
                             if (chunk.objects.Count > 0)
                             {
-                                Vector2 grabbedPosition = new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll, 0)).x,
-                                                      grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll)).y);
+                                Vector2 grabbedPosition = new Vector2((grid.FilterPosition(filteredMousePosition + new Vector2(hScroll + grid.rect.left, 0), gridScale).x),
+                                                                   (grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll + grid.rect.top), gridScale).y));
                                 selectedLevelObj.position = new ObjRect((int)grabbedPosition.x,
                                                                         (int)grabbedPosition.y,
                                                                             selectedLevelObj.position.width,
@@ -380,9 +393,11 @@ public class ChuckEditor : EditorWindow
 
         if (Event.current.control)
         {
-            Vector2 filteredMousePosition = new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x,
-                                                         HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y);
-            if (grid.rect.Contains(filteredMousePosition))
+            Vector2 filteredMousePosition = new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x - grid.rect.left,
+                                                         HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y - grid.rect.top);
+            filteredMousePosition /= gridScale; 
+            
+            if (grid.rect.Contains(filteredMousePosition * gridScale + new Vector2(grid.rect.left, grid.rect.top)))
             {
                 grabbedObj = new Rect(filteredMousePosition.x,
                                        filteredMousePosition.y,
@@ -402,9 +417,10 @@ public class ChuckEditor : EditorWindow
                         {
                             if (item.position.depth == ((activeLayer + 1) * 0.5f))
                             {
-                                if (ChangeType(item.position).Contains(new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2(hScroll , 0)).x,
-                                                                                   grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll)).y)))
+                                if (ChangeType(item.position).Contains(new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2(hScroll + grid.rect.left, 0), gridScale).x,
+                                                                                   grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll + grid.rect.top), gridScale).y)))
                                 {
+
                                     allowedToAdd = false;
                                     break;
                                 }
@@ -414,8 +430,8 @@ public class ChuckEditor : EditorWindow
                         if (allowedToAdd)
                         {
                             Debug.Log(TextureList.getSelectedItemContent());
-                            chunk.objects.Add(new LevelObj(new Rect(grid.FilterPosition(filteredMousePosition + new Vector2((int)(hScroll ), 0)).x,
-                                                                  grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)(vScroll ))).y,
+                            chunk.objects.Add(new LevelObj(new Rect((grid.FilterPosition(filteredMousePosition + new Vector2(hScroll + grid.rect.left, 0), gridScale).x),
+                                                                  (grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll + grid.rect.top), gridScale).y),
                                                                   grabbedObj.width,
                                                                   grabbedObj.height)
                                                          , Resources.Load<Texture>("Objects/" + TextureList.getSelectedItemContent()), chunk.idAccumulator,  ((activeLayer + 1) * 0.5f)));
@@ -426,8 +442,8 @@ public class ChuckEditor : EditorWindow
                     else
                     {
                         Debug.Log(TextureList.getSelectedItemContent());
-                        chunk.objects.Add(new LevelObj(new Rect(grid.FilterPosition(filteredMousePosition + new Vector2((int)(hScroll ), 0)).x ,
-                                                              grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)(vScroll ))).y,
+                        chunk.objects.Add(new LevelObj(new Rect((grid.FilterPosition(filteredMousePosition + new Vector2(hScroll + grid.rect.left, 0), gridScale).x),
+                                                 (grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll + grid.rect.top),gridScale).y),
                                                               grabbedObj.width,
                                                               grabbedObj.height)
                                                        , Resources.Load<Texture>("Objects/" + TextureList.getSelectedItemContent()), chunk.idAccumulator,  ((activeLayer + 1) * 0.5f)));
@@ -537,7 +553,7 @@ public class ChuckEditor : EditorWindow
     void CommitChanges()
     {
         noChangesApplied = true;
-        grid = new Grid(Canvas.width,Canvas.height, new Rect(215, 90, 500, 400), 40, 40);
+        grid = new Grid(Canvas.width,Canvas.height, new Rect(215, 90, 500, 400), grid.basePatchHeight, grid.basePatchHeight);
      
     }
     void RefreshEditor()
@@ -692,12 +708,35 @@ public class ChuckEditor : EditorWindow
             noChangesApplied = false;
         }
         
+        //GUI.Label(new Rect(250, 40, 100, 20), "Patch Height:");
+        //grid.patchHeight = int.Parse(GUI.TextField(new Rect(325, 40, 80, 20),
+        //grid.patchHeight.ToString()));
+        //GUI.Label(new Rect(430, 40, 100, 20), "Patch Width:");
+        //grid.patchWidth = int.Parse(GUI.TextField(new Rect(500, 40, 80, 20),
+        //                                          grid.patchWidth.ToString()));
+
+
+        float tmpGridScale = gridScale;
+
+        GUI.Label(new Rect(590, 520, 120, 20), "gridScale:");
+        gridScale = float.Parse(GUI.TextField(new Rect(655, 520, 50, 20), gridScale.ToString()));
+        gridScale = GUI.VerticalScrollbar(gridScalerRect, gridScale, 0.05f, 4, 0.1f);
+        if (tmpGridScale != gridScale)
+        {
+            grid.patchWidth = grid.basePatchWidth * gridScale;
+            grid.patchHeight = grid.basePatchHeight * gridScale;
+            tmpGridScale = gridScale;
+        }
         GUI.Label(new Rect(250, 40, 100, 20), "Patch Height:");
-        grid.patchHeight = int.Parse(GUI.TextField(new Rect(325, 40, 80, 20),
-        grid.patchHeight.ToString()));
+
+        grid.basePatchHeight = float.Parse(GUI.TextField(new Rect(325, 40, 80, 20),
+                                                  (grid.basePatchHeight).ToString()));
+        //grid.patchHeight = 40 * gridScale;
         GUI.Label(new Rect(430, 40, 100, 20), "Patch Width:");
-        grid.patchWidth = int.Parse(GUI.TextField(new Rect(500, 40, 80, 20),
-                                                  grid.patchWidth.ToString()));
+
+        grid.basePatchWidth = float.Parse(GUI.TextField(new Rect(500, 40, 80, 20),
+                                                    (grid.basePatchWidth).ToString()));
+        
         GUI.Label(new Rect(280, 10, 100, 20), "Chunk Height:");
         Canvas.height = int.Parse(GUI.TextField(new Rect(340, 10, 80, 20),
                                                  Canvas.height.ToString()));
@@ -751,25 +790,25 @@ public class ChuckEditor : EditorWindow
         SavedChunksList.EventHandler();
         TextureList.EventHandler();
 
-        hScroll = GUI.HorizontalScrollbar(new Rect(215, 490, 500, 10), hScroll, grid.patchWidth, 0, Canvas.width - grid.rect.width);
-        vScroll = GUI.VerticalScrollbar(new Rect(715, 90, 10, 400), vScroll, grid.patchHeight, 0, Canvas.height - grid.rect.height);
+        hScroll = GUI.HorizontalScrollbar(new Rect(215, 490, 500, 10), hScroll, grid.basePatchWidth /gridScale, 0, Canvas.width - grid.rect.width);
+        vScroll = GUI.VerticalScrollbar(new Rect(715, 90, 10, 400), vScroll, grid.basePatchHeight/gridScale, 0, Canvas.height - grid.rect.height);
 
         vScroll = vScroll < 0 ? 0 : vScroll;
         hScroll = hScroll < 0 ? 0 : hScroll;
 
-        grid.xMin = -(int)hScroll;
-        grid.yMin = -(int)vScroll;
-
+        grid.xMin = -hScroll * gridScale;
+        grid.yMin = -vScroll * gridScale;
+        
         foreach (var item in chunk.objects)
         {
             if (dynamicSelection.objects.Contains(item))
                 continue;
             if (item.position.depth == ((activeLayer + 1) * 0.5f))
             {
-                Rect tmpRect = new Rect(item.position.left - (int)(hScroll),
-                                        item.position.top - (int)(vScroll),
-                         item.position.width,
-                         item.position.height);
+                Rect tmpRect = new Rect((((item.position.left - grid.rect.left - hScroll) * gridScale) + grid.rect.left),
+                               (((item.position.top - grid.rect.top - vScroll) * gridScale) + grid.rect.top),
+                               item.position.width * gridScale,
+                               item.position.height * gridScale);
                 //if (!(tmpRect.xMin < grid.rect.xMin ||
                 //     tmpRect.yMin < grid.rect.yMin ||
                 //     tmpRect.xMax > grid.rect.xMax ||
@@ -780,10 +819,10 @@ public class ChuckEditor : EditorWindow
 
             if (GetActiveLayer().Contains((int)((item.position.depth) / 0.5f)))
             {
-                Rect tmpRect = new Rect((item.position.left - hScroll),
-                                        (item.position.top - vScroll) ,
-                                        item.position.width,
-                                        item.position.height);
+                Rect tmpRect = new Rect((((item.position.left - grid.rect.left - hScroll) * gridScale) + grid.rect.left),
+                               (((item.position.top - grid.rect.top - vScroll) * gridScale) + grid.rect.top),
+                               item.position.width * gridScale,
+                               item.position.height * gridScale);
                 //if (!(tmpRect.xMin < grid.rect.xMin ||
                 //     tmpRect.yMin < grid.rect.yMin ||
                 //     tmpRect.xMax > grid.rect.xMax ||
@@ -794,15 +833,15 @@ public class ChuckEditor : EditorWindow
         }
         Rect tmpR = new Rect(); 
         //if(movingCenterOfChunk)
-            tmpR = new Rect(chunk.centerOfChunk.left - 25 - (int)hScroll ,
-                     chunk.centerOfChunk.top - 25 - (int)vScroll ,
-                     50,
-                     50);
+            tmpR = new Rect((chunk.centerOfChunk.left - 25 - (int)hScroll - grid.rect.left)*gridScale + grid.rect.left ,
+                            (chunk.centerOfChunk.top - 25 - (int)vScroll - grid.rect.top) * gridScale + grid.rect.top,
+                     50*gridScale,
+                     50*gridScale);
         if(autoAdjustCOC)
-            tmpR = new Rect(chunk.CenterOfChunk.left - 25 - (int)hScroll,
-                     chunk.CenterOfChunk.top - 25 - (int)vScroll,
-                     50,
-                     50);
+            tmpR = new Rect((chunk.CenterOfChunk.left - 25 - (int)hScroll - grid.rect.left) * gridScale + grid.rect.left,
+                             (chunk.CenterOfChunk.top - 25 - (int)vScroll - grid.rect.top) * gridScale + grid.rect.top,
+                      50 * gridScale,
+                      50 * gridScale);
         //if (!(tmpR.xMin < grid.rect.xMin ||
         //     tmpR.yMin < grid.rect.yMin ||
         //     tmpR.xMax > grid.rect.xMax ||
@@ -814,10 +853,10 @@ public class ChuckEditor : EditorWindow
         {
             if (GetActiveLayer().Contains((int)((item.position.depth) / 0.5f)))
             {
-                Rect tmpRect = new Rect(item.position.left - (int)hScroll + (dynamicSelection.boundry.xMin - dynamicSelection.firstPos.x),
-                         item.position.top - (int)vScroll + (dynamicSelection.boundry.yMin - dynamicSelection.firstPos.y),
-                         item.position.width,
-                         item.position.height);
+                Rect tmpRect = new Rect(((item.position.left - hScroll - grid.rect.left) * gridScale) + grid.rect.left + (dynamicSelection.boundry.xMin - dynamicSelection.firstPos.x),
+                                        ((item.position.top - vScroll - grid.rect.top) * gridScale) + grid.rect.top + (dynamicSelection.boundry.yMin - dynamicSelection.firstPos.y),
+                                        item.position.width * gridScale,
+                                        item.position.height * gridScale);
                 //if (!(tmpRect.xMin < grid.rect.xMin ||
                 //     tmpRect.yMin < grid.rect.yMin ||
                 //     tmpRect.xMax > grid.rect.xMax ||
@@ -829,10 +868,13 @@ public class ChuckEditor : EditorWindow
           
         }
 
-        Rect tmpR2 = new Rect(objSelectorGrid.position.left - (int)hScroll,
-                             objSelectorGrid.position.top - (int)vScroll,
-                             objSelectorGrid.position.width,
-                             objSelectorGrid.position.height);
+
+
+
+        Rect tmpR2 = new Rect(((objSelectorGrid.position.left - hScroll - grid.rect.left) * gridScale) + grid.rect.left,
+                ((objSelectorGrid.position.top - grid.rect.top - vScroll) * gridScale) + grid.rect.top,
+                objSelectorGrid.position.width * gridScale,
+                objSelectorGrid.position.height * gridScale);
         
         //if (!(tmpR2.xMin < grid.rect.xMin ||
         //     tmpR2.yMin < grid.rect.yMin ||

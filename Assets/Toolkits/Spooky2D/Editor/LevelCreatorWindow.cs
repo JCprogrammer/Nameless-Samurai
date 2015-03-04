@@ -1140,8 +1140,8 @@ public class LevelCreatorWindow : EditorWindow
 
         
 
-        hScroll = GUI.HorizontalScrollbar(new Rect(180, 490, 800, 10), hScroll, grid.patchWidth , 0, level.width - grid.rect.width);
-        vScroll = GUI.VerticalScrollbar(new Rect(980, 90, 10, 400), vScroll, grid.patchHeight , 0, level.height - grid.rect.height);
+        hScroll = GUI.HorizontalScrollbar(new Rect(180, 490, 800, 10), hScroll, grid.basePatchWidth / gridScale , 0, level.width - grid.rect.width);
+        vScroll = GUI.VerticalScrollbar(new Rect(980, 90, 10, 400), vScroll, grid.basePatchHeight /gridScale, 0, level.height - grid.rect.height);
 
         vScroll = vScroll < 0 ? 0 : vScroll;
         hScroll = hScroll < 0 ? 0 : hScroll;
