@@ -537,7 +537,7 @@ public class ChuckEditor : EditorWindow
     void CommitChanges()
     {
         noChangesApplied = true;
-        grid = new Grid(800, 400, new Rect(215, 90, 500, 400), 40, 40);
+        grid = new Grid(Canvas.width,Canvas.height, new Rect(215, 90, 500, 400), 40, 40);
      
     }
     void RefreshEditor()
@@ -597,6 +597,67 @@ public class ChuckEditor : EditorWindow
     {
         ChunkItemList.SelectItem(selectedLevelObj.texture);
         changeSelectedBlockTexture("");
+    }
+
+    void RasterizeTexture(Rect tmpRect, Texture texture)
+    {
+
+        Rect txCords = new Rect(0, 0, 1, 1);
+
+        if (tmpRect.xMax > grid.rect.xMax)
+        {
+            float tmpRectWidth = tmpRect.width;
+            tmpRect.width *= ((Mathf.Min(tmpRect.xMax, grid.rect.xMax) - Mathf.Max(tmpRect.xMin, grid.rect.xMin)) / tmpRect.width);
+            txCords = new Rect(0,
+                0.0f,
+                (tmpRect.width / tmpRectWidth),
+                1);
+        }
+        else if (tmpRect.xMin < grid.rect.xMin)
+        {
+
+            float tmpRectWidth = tmpRect.width;
+            // float tmpRectXmin = tmpRect.xMin;
+            tmpRect.xMin = grid.rect.xMin;
+
+
+            tmpRect.width *= ((Mathf.Min(tmpRect.xMax, grid.rect.xMax) - Mathf.Max(tmpRect.xMin, grid.rect.xMin)) / tmpRect.width);
+            txCords = new Rect(1 - ((Mathf.Min(tmpRect.xMax, grid.rect.xMax) - Mathf.Max(tmpRect.xMin, grid.rect.xMin)) / tmpRectWidth),
+                               0.0f,
+                               tmpRect.width / tmpRectWidth,
+                               1);
+
+        }
+
+
+        if (tmpRect.yMax > grid.rect.yMax)
+        {
+            float tmpRectHeight = tmpRect.height;
+            tmpRect.height *= ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRect.height);
+            txCords = new Rect(0,
+                1 - ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRectHeight),
+                txCords.width,
+                (tmpRect.height / tmpRectHeight));
+        }
+
+        else if (tmpRect.yMin < grid.rect.yMin)
+        {
+
+            float tmpRectHeight = tmpRect.height;
+            // float tmpRectYmin = tmpRect.yMin;
+            tmpRect.yMin = grid.rect.yMin;
+
+
+            tmpRect.height *= ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRect.height);
+            txCords = new Rect(0,
+                               0,
+                               txCords.width,
+                               tmpRect.height / tmpRectHeight);
+
+        }
+        if (!(tmpRect.xMin > grid.rect.xMax || tmpRect.xMax < grid.rect.xMin))
+            if (!(tmpRect.yMin > grid.rect.yMax || tmpRect.yMax < grid.rect.yMin))
+                GUI.DrawTextureWithTexCoords(tmpRect, texture, txCords);
     }
     void OnGUI()
     {
@@ -709,11 +770,12 @@ public class ChuckEditor : EditorWindow
                                         item.position.top - (int)(vScroll),
                          item.position.width,
                          item.position.height);
-                if (!(tmpRect.xMin < grid.rect.xMin ||
-                     tmpRect.yMin < grid.rect.yMin ||
-                     tmpRect.xMax > grid.rect.xMax ||
-                     tmpRect.yMax > grid.rect.yMax))
-                    GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+                //if (!(tmpRect.xMin < grid.rect.xMin ||
+                //     tmpRect.yMin < grid.rect.yMin ||
+                //     tmpRect.xMax > grid.rect.xMax ||
+                //     tmpRect.yMax > grid.rect.yMax))
+                //    GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+                RasterizeTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
             }
 
             if (GetActiveLayer().Contains((int)((item.position.depth) / 0.5f)))
@@ -722,11 +784,12 @@ public class ChuckEditor : EditorWindow
                                         (item.position.top - vScroll) ,
                                         item.position.width,
                                         item.position.height);
-                if (!(tmpRect.xMin < grid.rect.xMin ||
-                     tmpRect.yMin < grid.rect.yMin ||
-                     tmpRect.xMax > grid.rect.xMax ||
-                     tmpRect.yMax > grid.rect.yMax))
-                    GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+                //if (!(tmpRect.xMin < grid.rect.xMin ||
+                //     tmpRect.yMin < grid.rect.yMin ||
+                //     tmpRect.xMax > grid.rect.xMax ||
+                //     tmpRect.yMax > grid.rect.yMax))
+                //    GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+                RasterizeTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
             }
         }
         Rect tmpR = new Rect(); 
@@ -740,13 +803,13 @@ public class ChuckEditor : EditorWindow
                      chunk.CenterOfChunk.top - 25 - (int)vScroll,
                      50,
                      50);
-        if (!(tmpR.xMin < grid.rect.xMin ||
-             tmpR.yMin < grid.rect.yMin ||
-             tmpR.xMax > grid.rect.xMax ||
-             tmpR.yMax > grid.rect.yMax))
+        //if (!(tmpR.xMin < grid.rect.xMin ||
+        //     tmpR.yMin < grid.rect.yMin ||
+        //     tmpR.xMax > grid.rect.xMax ||
+        //     tmpR.yMax > grid.rect.yMax))
 
-        GUI.DrawTexture(tmpR, Resources.Load<Texture>("plus"));
-
+        //GUI.DrawTexture(tmpR, Resources.Load<Texture>("plus"));
+        RasterizeTexture(tmpR, Resources.Load<Texture>("plus"));
         foreach (var item in dynamicSelection.objects)
         {
             if (GetActiveLayer().Contains((int)((item.position.depth) / 0.5f)))
@@ -755,11 +818,12 @@ public class ChuckEditor : EditorWindow
                          item.position.top - (int)vScroll + (dynamicSelection.boundry.yMin - dynamicSelection.firstPos.y),
                          item.position.width,
                          item.position.height);
-                if (!(tmpRect.xMin < grid.rect.xMin ||
-                     tmpRect.yMin < grid.rect.yMin ||
-                     tmpRect.xMax > grid.rect.xMax ||
-                     tmpRect.yMax > grid.rect.yMax))
-                    GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+                //if (!(tmpRect.xMin < grid.rect.xMin ||
+                //     tmpRect.yMin < grid.rect.yMin ||
+                //     tmpRect.xMax > grid.rect.xMax ||
+                //     tmpRect.yMax > grid.rect.yMax))
+                //    GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+                RasterizeTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
             }
 
           
@@ -770,13 +834,13 @@ public class ChuckEditor : EditorWindow
                              objSelectorGrid.position.width,
                              objSelectorGrid.position.height);
         
-        if (!(tmpR2.xMin < grid.rect.xMin ||
-             tmpR2.yMin < grid.rect.yMin ||
-             tmpR2.xMax > grid.rect.xMax ||
-             tmpR2.yMax > grid.rect.yMax))
+        //if (!(tmpR2.xMin < grid.rect.xMin ||
+        //     tmpR2.yMin < grid.rect.yMin ||
+        //     tmpR2.xMax > grid.rect.xMax ||
+        //     tmpR2.yMax > grid.rect.yMax))
 
-            GUI.DrawTexture(tmpR2, Resources.Load<Texture>(objSelectorGrid.texture));
-
+        //    GUI.DrawTexture(tmpR2, Resources.Load<Texture>(objSelectorGrid.texture));
+        RasterizeTexture(tmpR2, Resources.Load<Texture>(objSelectorGrid.texture));
         GUI.DrawTexture(new Rect(225, 430, 50, 50), Resources.Load<Texture>("Coordinate"));
        MovingCOC();
 
