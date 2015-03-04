@@ -1005,7 +1005,7 @@ public class LevelCreatorWindow : EditorWindow
         {
             float tmpRectHeight = tmpRect.height;
             tmpRect.height *= ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRect.height);
-            txCords = new Rect(0,
+            txCords = new Rect(txCords.xMin,
                 1 - ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRectHeight),
                 txCords.width,
                 (tmpRect.height / tmpRectHeight));
@@ -1020,7 +1020,7 @@ public class LevelCreatorWindow : EditorWindow
 
 
             tmpRect.height *= ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRect.height);
-            txCords = new Rect(0,
+            txCords = new Rect(txCords.xMin,
                                0,
                                txCords.width,
                                tmpRect.height / tmpRectHeight);

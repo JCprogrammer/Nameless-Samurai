@@ -177,7 +177,7 @@ public class ChuckEditor : EditorWindow
                 {
                     if (dynamicSelection.drawRect.Contains(new Vector2((item.position.left - grid.rect.left) * gridScale + grid.rect.left,
                                                                        (item.position.top - grid.rect.top) * gridScale + grid.rect.top))
-                                                            && (GetActiveLayer().Contains((40 - (int)item.position.depth) / 5)))
+                                                            && (GetActiveLayer().Contains((int)( (item.position.depth) / 0.5f))))
                     {
                         dynamicSelection.objects.Add(item);
 
@@ -329,9 +329,10 @@ public class ChuckEditor : EditorWindow
         if (Event.current.control)
         {
 
-            Vector2 filteredMousePosition = new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x,
-                                         HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y);
-            filteredMousePosition /= gridScale; if (grid.rect.Contains(filteredMousePosition * gridScale + new Vector2(grid.rect.left, grid.rect.top)))
+            Vector2 filteredMousePosition = new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x - grid.rect.left,
+                                         HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y - grid.rect.top);
+            filteredMousePosition /= gridScale; 
+            if (grid.rect.Contains(filteredMousePosition * gridScale + new Vector2(grid.rect.left, grid.rect.top)))
             {
 
                 grabbedObj = new Rect(filteredMousePosition.x,
@@ -650,7 +651,7 @@ public class ChuckEditor : EditorWindow
         {
             float tmpRectHeight = tmpRect.height;
             tmpRect.height *= ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRect.height);
-            txCords = new Rect(0,
+            txCords = new Rect(txCords.xMin,
                 1 - ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRectHeight),
                 txCords.width,
                 (tmpRect.height / tmpRectHeight));
@@ -665,7 +666,7 @@ public class ChuckEditor : EditorWindow
 
 
             tmpRect.height *= ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRect.height);
-            txCords = new Rect(0,
+            txCords = new Rect(txCords.xMin,
                                0,
                                txCords.width,
                                tmpRect.height / tmpRectHeight);
