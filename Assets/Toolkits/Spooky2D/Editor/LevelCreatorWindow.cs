@@ -995,7 +995,7 @@ public class LevelCreatorWindow : EditorWindow
                 (tmpRect.width / tmpRectWidth),
                 1);
         }
-        else if (tmpRect.xMin < grid.rect.xMin)
+         if (tmpRect.xMin < grid.rect.xMin)
         {
 
             float tmpRectWidth = tmpRect.width;
@@ -1022,7 +1022,7 @@ public class LevelCreatorWindow : EditorWindow
                 (tmpRect.height / tmpRectHeight));
         }
 
-        else if (tmpRect.yMin < grid.rect.yMin)
+         if (tmpRect.yMin < grid.rect.yMin)
         {
 
             float tmpRectHeight = tmpRect.height;

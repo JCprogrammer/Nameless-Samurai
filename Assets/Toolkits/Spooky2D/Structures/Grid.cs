@@ -34,7 +34,15 @@ public class Grid
 	{
 		position = new Vector2 (position.x - rect.xMin, position.y - rect.yMin);
         float fixedPosX = (Mathf.FloorToInt(position.x / (patchWidth / gridScale)) * (patchWidth / gridScale));
+        if (fixedPosX >= contentWidth - basePatchWidth)
+        {
+            fixedPosX = contentWidth - (2 * basePatchWidth);
+        }
         float fixedPosY = (Mathf.FloorToInt(position.y / (patchHeight / gridScale)) * (patchHeight / gridScale));
+        if (fixedPosY >= contentHeight - basePatchHeight)
+        {
+            fixedPosY = contentHeight - (2 * basePatchHeight);
+        }
         return new Vector2 (fixedPosX + rect.xMin, fixedPosY + rect.yMin);
         
 	}
@@ -43,13 +51,13 @@ public class Grid
 		GUI.color = new Color(1,1,1,0.1f);
 		GUI.Box(rect,
 		        content);
-		for (float i = 0; i < contentWidth; i += patchWidth)
+		for (float i = 0 , j = 0; j < contentWidth ; i += patchWidth, j+= basePatchWidth)
 		{
 			if(xMin + rect.xMin + i >= rect.xMin  && xMin + rect.xMin + i < rect.xMax)
 				GUI.DrawTexture(new Rect(xMin + rect.xMin + i, rect.yMin, 1, rect.height), 
 				                Resources.Load<Texture>("HLine"));
 		}
-		for (float i = 0; i < contentHeight; i += patchHeight)
+		for (float i = 0 , j = 0; j < contentHeight; i += patchHeight , j+= basePatchWidth )
 		{
 			if(yMin + rect.yMin  + i >= rect.yMin && yMin + rect.yMin + i < rect.yMax)
 				GUI.DrawTexture(new Rect(rect.xMin, yMin + rect.yMin + i, rect.width, 1), 
