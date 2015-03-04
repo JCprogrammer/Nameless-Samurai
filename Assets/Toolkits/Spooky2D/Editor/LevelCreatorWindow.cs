@@ -727,11 +727,22 @@ public class LevelCreatorWindow : EditorWindow
                                                  GlobalVariables.minifier, -1 * (float)(((Chunk)item).centerOfChunk.top) /
                                                  GlobalVariables.minifier, 0) + new Vector3(20.0f/GlobalVariables.minifier,40.0f/GlobalVariables.minifier,item.position.depth);
             Debug.Log("Number of objects: " + ((Chunk)item).objects.Count + "Center of Chunk" + ((Chunk)item).centerOfChunk.top);
+
+            ChunkData cData = ChunkContainer.AddComponent<ChunkData>();
+            float xMin = ((Chunk)item).centerOfChunk.left;
+            float xMax = ((Chunk)item).centerOfChunk.left;
+            
             foreach (var item2 in ((Chunk)item).objects)
             {
+                if (item2.position.left + ((Chunk)item).centerOfChunk.left < xMin)
+                    xMin = item2.position.left + ((Chunk)item).centerOfChunk.left;
+                if (item.position.left + item.position.width + ((Chunk)item).centerOfChunk.left > xMax)
+                    xMax = item.position.left + item.position.width + ((Chunk)item).centerOfChunk.left;
                 CreateSceneObject(item2,ChunkContainer.transform);
 
             }
+            Debug.Log(xMax + " " + xMin);
+            cData.chunkLength = (xMax - xMin) * 2 / GlobalVariables.minifier;
            return;     
         }
         GameObject sceneObj;

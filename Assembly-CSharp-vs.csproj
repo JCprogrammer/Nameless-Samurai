@@ -98,6 +98,7 @@
      <Compile Include="Assets\Toolkits\Spooky2D\Sensors\KeyboardSensor.cs" />
      <Compile Include="Assets\Toolkits\Spooky2D\Sensors\SoundtrackTrigger.cs" />
      <Compile Include="Assets\Toolkits\Spooky2D\Sensors\Trigger.cs" />
+     <Compile Include="Assets\Toolkits\Spooky2D\Structures\ChunkData.cs" />
      <Compile Include="Assets\Toolkits\Spooky2D\Structures\CubeFile.cs" />
      <Compile Include="Assets\Toolkits\Spooky2D\Structures\GlobalVariables.cs" />
      <Compile Include="Assets\Toolkits\Spooky2D\Structures\Grid.cs" />
