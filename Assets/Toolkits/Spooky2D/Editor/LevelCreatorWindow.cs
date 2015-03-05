@@ -530,8 +530,8 @@ public class LevelCreatorWindow : EditorWindow
                                                  HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y);
                     if (grid.rect.Contains(filteredMousePosition))
                     {
-                        chunk.centerOfChunk = new ObjRect((grid.FilterPosition(filteredMousePosition - new Vector2(vScroll, hScroll)).x / gridScale),
-                                                            (grid.FilterPosition(filteredMousePosition).y/gridScale),
+                        chunk.centerOfChunk = new ObjRect((grid.FilterPosition(filteredMousePosition - new Vector2(hScroll,0)).x / gridScale),
+                                                            (grid.FilterPosition(filteredMousePosition - new Vector2(0,vScroll)).y/gridScale),
                                                             10, 10);
                         foreach (var chunkObject in chunk.objects)
                         {
@@ -547,7 +547,10 @@ public class LevelCreatorWindow : EditorWindow
                                 GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + chunkObject.texture));
 
                         }
-                        GUI.DrawTexture(new Rect(chunk.centerOfChunk.left - 5, chunk.centerOfChunk.top - 5, 10, 10), Resources.Load<Texture>("plus"));
+                        GUI.DrawTexture(new Rect((chunk.centerOfChunk.left - 5  ) * gridScale ,
+                                                  (chunk.centerOfChunk.top - 5  ) * gridScale ,
+                                                  10, 10),
+                                                  Resources.Load<Texture>("plus"));
 
                     }
 
@@ -864,7 +867,9 @@ public class LevelCreatorWindow : EditorWindow
     {
         noChangesApplied = true;
         grid = new Grid(level.width, level.height, new Rect(180, 90, 800, 400),
-                        grid.patchWidth , grid.patchHeight );
+                        grid.basePatchWidth, grid.basePatchHeight);
+        grid.patchWidth = grid.basePatchWidth * gridScale;
+        grid.patchHeight = grid.basePatchHeight * gridScale;
         if (Camera.main.GetComponent<SoundController>() != null)
             Camera.main.GetComponent<SoundController>().startFrom = float.Parse(TimeSpan);
 
@@ -1213,7 +1218,9 @@ public class LevelCreatorWindow : EditorWindow
                             RTNew(tmpRect, Resources.Load<Texture>("Objects/" + chunkObject.texture));
 
                     }
-                    Rect pivotPos = new Rect(((Chunk)item).centerOfChunk.left - 5 - hScroll, ((Chunk)item).centerOfChunk.top - 5 - vScroll, 10, 10);
+                    Rect pivotPos = new Rect((((Chunk)item).centerOfChunk.left - 5 - hScroll - grid.rect.left) * gridScale + grid.rect.left,
+                                             (((Chunk)item).centerOfChunk.top - 5 - vScroll - grid.rect.top)*gridScale + grid.rect.top,
+                                             10, 10);
                     RTNew(pivotPos, Resources.Load<Texture>("plus"));
 
                 }
