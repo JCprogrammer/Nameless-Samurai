@@ -721,8 +721,10 @@ public class LevelCreatorWindow : EditorWindow
         {
             Debug.Log("Is Chunk");
             GameObject ChunkContainer = GameObject.Find(((Chunk)item).Name + "." + item.id.ToString());
-            if(ChunkContainer == null)
+            if (ChunkContainer == null)
                 ChunkContainer = new GameObject(((Chunk)item).Name + "." + item.id.ToString());
+            else
+                return;
             ChunkContainer.transform.position = new Vector3(1 * (float)(((Chunk)item).centerOfChunk.left) /
                                                  GlobalVariables.minifier, -1 * (float)(((Chunk)item).centerOfChunk.top) /
                                                  GlobalVariables.minifier, 0) + new Vector3(20.0f/GlobalVariables.minifier,40.0f/GlobalVariables.minifier,item.position.depth);
@@ -981,66 +983,89 @@ public class LevelCreatorWindow : EditorWindow
         changeSelectedBlockTexture("");
     }
 
-    void RasterizeTexture( Rect tmpRect, Texture texture)
+    void RTNew(Rect tmpRect, Texture texture)
     {
-
         Rect txCords = new Rect(0, 0, 1, 1);
-       
-        if (tmpRect.xMax > grid.rect.xMax)
-        {
-            float tmpRectWidth = tmpRect.width;
-            tmpRect.width *= ((Mathf.Min(tmpRect.xMax, grid.rect.xMax) - Mathf.Max(tmpRect.xMin, grid.rect.xMin)) / tmpRect.width);
-            txCords = new Rect(0,
-                0.0f,
-                (tmpRect.width / tmpRectWidth),
-                1);
-        }
-         if (tmpRect.xMin < grid.rect.xMin)
-        {
+        float tXMin = Mathf.Max(grid.rect.xMin, tmpRect.xMin);
+        float tXMax = Mathf.Min(grid.rect.xMax, tmpRect.xMax);
+        float txXmin = tmpRect.xMin;
+        
+        
+        float xScale = tmpRect.width / (tXMax - tXMin);
+        float txCordsXMin = (tXMin - txXmin) / tmpRect.width;
+        tmpRect.xMin = tXMin;
+        tmpRect.xMax = tXMax;
 
-            float tmpRectWidth = tmpRect.width;
-            // float tmpRectXmin = tmpRect.xMin;
-            tmpRect.xMin = grid.rect.xMin;
+        float tYMin = Mathf.Max(grid.rect.yMin, tmpRect.yMin);
+        float tYMax = Mathf.Min(grid.rect.yMax, tmpRect.yMax);
+        float txYmin = tYMin;
 
 
-            tmpRect.width *= ((Mathf.Min(tmpRect.xMax, grid.rect.xMax) - Mathf.Max(tmpRect.xMin, grid.rect.xMin)) / tmpRect.width);
-            txCords = new Rect(1 - ((Mathf.Min(tmpRect.xMax, grid.rect.xMax) - Mathf.Max(tmpRect.xMin, grid.rect.xMin)) / tmpRectWidth),
-                               0.0f,
-                               tmpRect.width / tmpRectWidth,
-                               1);
+        float yScale = tmpRect.height / (tYMax - tYMin);
+        float txCordsYMin =  (tYMin - txYmin) / tmpRect.height;
+        tmpRect.yMin = tYMin;
+        tmpRect.yMax = tYMax;
 
-        }
-
-
-        if (tmpRect.yMax > grid.rect.yMax)
-        {
-            float tmpRectHeight = tmpRect.height;
-            tmpRect.height *= ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRect.height);
-            txCords = new Rect(txCords.xMin,
-                1 - ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRectHeight),
-                txCords.width,
-                (tmpRect.height / tmpRectHeight));
-        }
-
-         if (tmpRect.yMin < grid.rect.yMin)
-        {
-
-            float tmpRectHeight = tmpRect.height;
-            // float tmpRectYmin = tmpRect.yMin;
-            tmpRect.yMin = grid.rect.yMin;
-
-
-            tmpRect.height *= ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRect.height);
-            txCords = new Rect(txCords.xMin,
-                               0,
-                               txCords.width,
-                               tmpRect.height / tmpRectHeight);
-
-        }
+        txCords = new Rect(txCordsXMin, txCordsYMin , 1 / xScale, 1 / yScale);
         if (!(tmpRect.xMin > grid.rect.xMax || tmpRect.xMax < grid.rect.xMin))
             if (!(tmpRect.yMin > grid.rect.yMax || tmpRect.yMax < grid.rect.yMin))
                 GUI.DrawTextureWithTexCoords(tmpRect, texture, txCords);
     }
+    //void RasterizeTexture( Rect tmpRect, Texture texture)
+    //{
+
+    //    Rect txCords = new Rect(0, 0, 1, 1);
+    //    if (tmpRect.xMax > grid.rect.xMax)
+    //    {
+    //        float tmpRectWidth = tmpRect.width;
+    //        tmpRect.width *= ((Mathf.Min(tmpRect.xMax, grid.rect.xMax) - Mathf.Max(tmpRect.xMin, grid.rect.xMin)) / tmpRect.width);
+    //        txCords = new Rect(0,
+    //            0.0f,
+    //            (tmpRect.width / tmpRectWidth),
+    //            1);
+    //    }
+
+    //    if (tmpRect.xMin <= grid.rect.xMin)
+    //    {
+    //        float tmpRectWidth = tmpRect.width;
+    //        // float tmpRectXmin = tmpRect.xMin;
+    //        tmpRect.xMin = grid.rect.xMin;
+    //        tmpRect.width *= ((Mathf.Min(tmpRect.xMax, grid.rect.xMax) - Mathf.Max(tmpRect.xMin, grid.rect.xMin)) / tmpRect.width);
+    //        txCords = new Rect(1 - ((Mathf.Min(tmpRect.xMax, grid.rect.xMax) - Mathf.Max(tmpRect.xMin, grid.rect.xMin)) / tmpRectWidth),
+    //                           0.0f,
+    //                           tmpRect.width / tmpRectWidth,
+    //                           1);
+    //    }
+    //    if (tmpRect.yMax >= grid.rect.yMax)
+    //    {
+    //        float tmpRectHeight = tmpRect.height;
+    //        tmpRect.height *= ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRect.height);
+            
+    //        txCords = new Rect(txCords.xMin,
+    //            1 - ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRectHeight),
+    //            txCords.width,
+    //            (tmpRect.height / tmpRectHeight));
+    //    }
+
+    //     if (tmpRect.yMin < grid.rect.yMin)
+    //    {
+
+    //        float tmpRectHeight = tmpRect.height;
+    //        // float tmpRectYmin = tmpRect.yMin;
+    //        tmpRect.yMin = grid.rect.yMin;
+
+
+    //        tmpRect.height *= ((Mathf.Min(tmpRect.yMax, grid.rect.yMax) - Mathf.Max(tmpRect.yMin, grid.rect.yMin)) / tmpRect.height);
+    //        txCords = new Rect(txCords.xMin,
+    //                           0,
+    //                           txCords.width,
+    //                           tmpRect.height / tmpRectHeight);
+
+    //    }
+    //    if (!(tmpRect.xMin > grid.rect.xMax || tmpRect.xMax < grid.rect.xMin))
+    //        if (!(tmpRect.yMin > grid.rect.yMax || tmpRect.yMax < grid.rect.yMin))
+    //            GUI.DrawTextureWithTexCoords(tmpRect, texture, txCords);
+    //}
     void OnGUI()
     {
         DeleteItem();
@@ -1185,11 +1210,11 @@ public class LevelCreatorWindow : EditorWindow
                             //     tmpRect.xMax > grid.rect.xMax ||
                             //     tmpRect.yMax > grid.rect.yMax))
                             //    GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + chunkObject.texture));
-                            RasterizeTexture(tmpRect, Resources.Load<Texture>("Objects/" + chunkObject.texture));
+                            RTNew(tmpRect, Resources.Load<Texture>("Objects/" + chunkObject.texture));
 
                     }
                     Rect pivotPos = new Rect(((Chunk)item).centerOfChunk.left - 5 - hScroll, ((Chunk)item).centerOfChunk.top - 5 - vScroll, 10, 10);
-                    RasterizeTexture(pivotPos, Resources.Load<Texture>("plus"));
+                    RTNew(pivotPos, Resources.Load<Texture>("plus"));
 
                 }
                 continue;
@@ -1202,7 +1227,7 @@ public class LevelCreatorWindow : EditorWindow
                                (((item.position.top - grid.rect.top - vScroll) * gridScale) + grid.rect.top),
                                item.position.width * gridScale,
                                item.position.height * gridScale);
-                RasterizeTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+                RTNew(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
             }
         }
 
@@ -1219,7 +1244,7 @@ public class LevelCreatorWindow : EditorWindow
                 //     tmpRect.xMax > grid.rect.xMax ||
                 //     tmpRect.yMax > grid.rect.yMax))
                 //    GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
-                RasterizeTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+                RTNew(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
             }
         }
 
@@ -1232,7 +1257,7 @@ public class LevelCreatorWindow : EditorWindow
         //     tmpR.xMax > grid.rect.xMax ||
         //     tmpR.yMax > grid.rect.yMax))
         //    GUI.DrawTexture(tmpR, Resources.Load<Texture>(objSelectorGrid.texture));
-        RasterizeTexture( tmpR, Resources.Load<Texture>(objSelectorGrid.texture));
+        RTNew( tmpR, Resources.Load<Texture>(objSelectorGrid.texture));
         GUI.DrawTexture(new Rect(190, 380, 100, 100), Resources.Load<Texture>("Coordinate"));
         if (selectedBlock != null)
         {
