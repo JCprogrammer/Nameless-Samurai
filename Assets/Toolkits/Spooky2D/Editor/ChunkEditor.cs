@@ -435,9 +435,10 @@ public class ChuckEditor : EditorWindow
                                                                   (grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll + grid.rect.top), gridScale).y),
                                                                   grabbedObj.width,
                                                                   grabbedObj.height)
-                                                         , Resources.Load<Texture>("Objects/" + TextureList.getSelectedItemContent()), chunk.idAccumulator,  ((activeLayer + 1) * 0.5f)));
+                                                         , Resources.Load<Texture>("Objects/" + TextureList.getSelectedItemContent()), chunk.idAccumulator,((activeLayer + 1) * 0.5f)));
                             ChunkItemList.Additem(new string[] { chunk.objects[chunk.objects.Count - 1].texture + "." + chunk.idAccumulator.ToString() });
                             chunk.idAccumulator++;
+                            SordChunkItems(); 
                         }
                     }
                     else
@@ -447,13 +448,26 @@ public class ChuckEditor : EditorWindow
                                                  (grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll + grid.rect.top),gridScale).y),
                                                               grabbedObj.width,
                                                               grabbedObj.height)
-                                                       , Resources.Load<Texture>("Objects/" + TextureList.getSelectedItemContent()), chunk.idAccumulator,  ((activeLayer + 1) * 0.5f)));
+                                                       , Resources.Load<Texture>("Objects/" + TextureList.getSelectedItemContent()), chunk.idAccumulator, ((activeLayer + 1) * 0.5f)));
                         TextureList.Additem(new string[] { chunk.objects[0].texture + "." + chunk.idAccumulator.ToString() });
                         chunk.idAccumulator++;
+                        SordChunkItems();
                     }
                 }
 
 
+            }
+        }
+    }
+    void SordChunkItems()
+    {
+        LevelObj unsortedObj = chunk.objects[chunk.objects.Count - 1];
+        for (int i = chunk.objects.Count - 2; i >= 0 ; i--)
+        {
+            if (unsortedObj.position.depth > chunk.objects[i].position.depth)
+            {
+                chunk.objects[chunk.objects.Count - 1] = chunk.objects[i];
+                chunk.objects[i] = unsortedObj;
             }
         }
     }
@@ -556,7 +570,8 @@ public class ChuckEditor : EditorWindow
     {
         noChangesApplied = true;
         grid = new Grid(Canvas.width,Canvas.height, new Rect(215, 90, 500, 400), grid.basePatchHeight, grid.basePatchHeight);
-     
+        grid.patchWidth = grid.basePatchWidth * gridScale;
+        grid.patchHeight = grid.basePatchHeight * gridScale;
     }
     void RefreshEditor()
     {
@@ -632,11 +647,11 @@ public class ChuckEditor : EditorWindow
 
         float tYMin = Mathf.Max(grid.rect.yMin, tmpRect.yMin);
         float tYMax = Mathf.Min(grid.rect.yMax, tmpRect.yMax);
-        float txYmin = tYMin;
+        float txYmin = tmpRect.yMax;
 
 
         float yScale = tmpRect.height / (tYMax - tYMin);
-        float txCordsYMin = (tYMin - txYmin) / tmpRect.height;
+        float txCordsYMin = (txYmin - tYMax) / tmpRect.height;
         tmpRect.yMin = tYMin;
         tmpRect.yMax = tYMax;
 
@@ -829,7 +844,6 @@ public class ChuckEditor : EditorWindow
 
         grid.xMin = -hScroll * gridScale;
         grid.yMin = -vScroll * gridScale;
-        
         foreach (var item in chunk.objects)
         {
             if (dynamicSelection.objects.Contains(item))

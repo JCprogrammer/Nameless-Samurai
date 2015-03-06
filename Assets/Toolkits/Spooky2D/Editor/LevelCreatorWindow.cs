@@ -530,8 +530,8 @@ public class LevelCreatorWindow : EditorWindow
                                                  HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y);
                     if (grid.rect.Contains(filteredMousePosition))
                     {
-                        chunk.centerOfChunk = new ObjRect((grid.FilterPosition(filteredMousePosition - new Vector2(hScroll,0)).x / gridScale),
-                                                            (grid.FilterPosition(filteredMousePosition - new Vector2(0,vScroll)).y/gridScale),
+                        chunk.centerOfChunk = new ObjRect((grid.FilterPosition(filteredMousePosition ).x / gridScale),
+                                                            (grid.FilterPosition(filteredMousePosition ).y/gridScale),
                                                             10, 10);
                         foreach (var chunkObject in chunk.objects)
                         {
@@ -540,11 +540,7 @@ public class LevelCreatorWindow : EditorWindow
                                 chunkObject.position.width * gridScale,
                                 chunkObject.position.height * gridScale);
 
-                            if (!(tmpRect.xMin < grid.rect.xMin ||
-                                 tmpRect.yMin < grid.rect.yMin ||
-                                 tmpRect.xMax > grid.rect.xMax ||
-                                 tmpRect.yMax > grid.rect.yMax))
-                                GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + chunkObject.texture));
+                            RTNew(tmpRect, Resources.Load<Texture>("Objects/" + chunkObject.texture));
 
                         }
                         GUI.DrawTexture(new Rect((chunk.centerOfChunk.left - 5  ) * gridScale ,
@@ -734,20 +730,20 @@ public class LevelCreatorWindow : EditorWindow
             Debug.Log("Number of objects: " + ((Chunk)item).objects.Count + "Center of Chunk" + ((Chunk)item).centerOfChunk.top);
 
             ChunkData cData = ChunkContainer.AddComponent<ChunkData>();
-            float xMin = ((Chunk)item).centerOfChunk.left;
-            float xMax = ((Chunk)item).centerOfChunk.left;
-            
+            float xMin = ((Chunk)item).centerOfChunk.left + ((Chunk)item).objects[0].position.left;
+            float xMax = ((Chunk)item).centerOfChunk.left + ((Chunk)item).objects[0].position.left + ((Chunk)item).objects[0].position.width;
+            Debug.Log(xMax);
             foreach (var item2 in ((Chunk)item).objects)
             {
                 if (item2.position.left + ((Chunk)item).centerOfChunk.left < xMin)
                     xMin = item2.position.left + ((Chunk)item).centerOfChunk.left;
-                if (item.position.left + item.position.width + ((Chunk)item).centerOfChunk.left > xMax)
-                    xMax = item.position.left + item.position.width + ((Chunk)item).centerOfChunk.left;
+                if (item2.position.left + item2.position.width + ((Chunk)item).centerOfChunk.left > xMax)
+                    xMax = item2.position.left + item2.position.width + ((Chunk)item).centerOfChunk.left;
                 CreateSceneObject(item2,ChunkContainer.transform);
 
             }
             Debug.Log(xMax + " " + xMin);
-            cData.chunkLength = (xMax - xMin) * 2 / GlobalVariables.minifier;
+            cData.chunkLength = (xMax - xMin)  / GlobalVariables.minifier;
            return;     
         }
         GameObject sceneObj;
@@ -828,7 +824,7 @@ public class LevelCreatorWindow : EditorWindow
                                                            GlobalVariables.minifier, -1 * (float)item.position.top /
                                                            GlobalVariables.minifier, 0) + new Vector3((1 * (float)item.position.width /
                                                                                                         (GlobalVariables.minifier * 2)) + 1, (-1 * (float)item.position.height /
-                                                                                                     (GlobalVariables.minifier * 2)) + 2, item.position.depth);
+                                                                                                     (GlobalVariables.minifier * 2)) + 2, parent == null ? item.position.depth : 5 - item.position.depth);
         if (parent != null)
         {
             sceneObjContainer.transform.position += parent.position - new Vector3(25 / GlobalVariables.minifier, 50 / GlobalVariables.minifier, 0);
@@ -1003,11 +999,11 @@ public class LevelCreatorWindow : EditorWindow
 
         float tYMin = Mathf.Max(grid.rect.yMin, tmpRect.yMin);
         float tYMax = Mathf.Min(grid.rect.yMax, tmpRect.yMax);
-        float txYmin = tYMin;
+        float txYmin = tmpRect.yMax;
 
 
         float yScale = tmpRect.height / (tYMax - tYMin);
-        float txCordsYMin =  (tYMin - txYmin) / tmpRect.height;
+        float txCordsYMin =  (txYmin - tYMax ) / tmpRect.height;
         tmpRect.yMin = tYMin;
         tmpRect.yMax = tYMax;
 

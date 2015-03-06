@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\Editor\AttackMechanicEditor.cs" />
+     <Compile Include="Assets\Scripts\Editor\CharacterAvatar.cs" />
      <Compile Include="Assets\Scripts\Editor\WeaponEditor.cs" />
      <Compile Include="Assets\Toolkits\Sonic Ether\Natural Bloom\Editor\SENaturalBloomAndDirtyLensEditor.cs" />
      <Compile Include="Assets\Toolkits\Spooky2D\Editor\ChunkEditor.cs" />
