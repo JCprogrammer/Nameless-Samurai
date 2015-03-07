@@ -578,8 +578,7 @@ public class LevelCreatorWindow : EditorWindow
                             item.id, item.position.depth + 40 - ((activeLayer + 1) * 5)));        
 	                }
                     level.objects.Add(new Chunk("[chunk]" + chunk.Name, new Rect(), level.idAccumulator, 40 - ((activeLayer + 1) * 5), objBuffer));
-                    
-                    
+                                         
                     lst4.Additem(new string[] { ((Chunk)level.objects[level.objects.Count - 1]).Name + "." + level.idAccumulator.ToString() });
                     level.idAccumulator++;
                     Debug.Log(((Chunk)level.objects[level.objects.Count - 1]).Name);
@@ -824,7 +823,7 @@ public class LevelCreatorWindow : EditorWindow
                                                            GlobalVariables.minifier, -1 * (float)item.position.top /
                                                            GlobalVariables.minifier, 0) + new Vector3((1 * (float)item.position.width /
                                                                                                         (GlobalVariables.minifier * 2)) + 1, (-1 * (float)item.position.height /
-                                                                                                     (GlobalVariables.minifier * 2)) + 2, parent == null ? item.position.depth : 5 - item.position.depth);
+                                                                                                     (GlobalVariables.minifier * 2)) + 2, parent == null ? item.position.depth :parent.position.z  - item.position.depth);
         if (parent != null)
         {
             sceneObjContainer.transform.position += parent.position - new Vector3(25 / GlobalVariables.minifier, 50 / GlobalVariables.minifier, 0);
@@ -1175,17 +1174,17 @@ public class LevelCreatorWindow : EditorWindow
         lst5.EventHandler();
         lst6.EventHandler();
 
-        
 
-        hScroll = GUI.HorizontalScrollbar(new Rect(180, 490, 800, 10), hScroll, grid.basePatchWidth / gridScale , 0, level.width - grid.rect.width);
-        vScroll = GUI.VerticalScrollbar(new Rect(980, 90, 10, 400), vScroll, grid.basePatchHeight /gridScale, 0, level.height - grid.rect.height);
+
+        hScroll = GUI.HorizontalScrollbar(new Rect(180, 490, window.position.xMax - window.position.xMin - 180, 10), hScroll, grid.basePatchWidth / gridScale, 0, level.width - grid.rect.width);
+        vScroll = GUI.VerticalScrollbar(new Rect(window.position.xMax - window.position.xMin - 20, 90, 10, 400), vScroll, grid.basePatchHeight / gridScale, 0, level.height - grid.rect.height);
 
         vScroll = vScroll < 0 ? 0 : vScroll;
         hScroll = hScroll < 0 ? 0 : hScroll;
 
         grid.xMin = -hScroll*gridScale;
         grid.yMin = -vScroll*gridScale;
-        
+        grid.rect.xMax = window.position.xMax - window.position.xMin - 25;
         grid.Draw();
         MoveChunk();
         GenerateChunk();
@@ -1195,7 +1194,9 @@ public class LevelCreatorWindow : EditorWindow
                 continue;
             if (item is Chunk)
             {
-                if (item.position.depth == 40 - ((activeLayer + 1) * 5))
+                //if (item.position.depth == 40 - ((activeLayer + 1) * 5))
+                //{
+                if (GetActiveLayer().Contains((40 - (int)item.position.depth) / 5))
                 {
                     foreach (var chunkObject in ((Chunk)item).objects)
                     {
@@ -1222,9 +1223,9 @@ public class LevelCreatorWindow : EditorWindow
                 }
                 continue;
             }
-            
-            
-            if (GetActiveLayer().Contains((40-(int)item.position.depth)/5))
+
+
+            if (GetActiveLayer().Contains((40 - (int)item.position.depth) / 5))
             {
                 Rect tmpRect = new Rect((((item.position.left - grid.rect.left - hScroll) * gridScale) + grid.rect.left),
                                (((item.position.top - grid.rect.top - vScroll) * gridScale) + grid.rect.top),

@@ -110,12 +110,14 @@ public class ChuckEditor : EditorWindow
     {
         if (movingCenterOfChunk)
         {
-            Vector2 filteredMousePosition = new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x,
-                                         HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y);
-            if (grid.rect.Contains(filteredMousePosition))
+            Vector2 filteredMousePosition = new Vector2(HandleUtility.WorldToGUIPoint(Event.current.mousePosition).x - grid.rect.left,
+                                                        HandleUtility.WorldToGUIPoint(Event.current.mousePosition).y - grid.rect.top);
+            filteredMousePosition /= gridScale;
+
+            if (grid.rect.Contains(filteredMousePosition * gridScale + new Vector2(grid.rect.left, grid.rect.top)))
             {
-                Vector2 grabbedPosition = new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll, 0)).x,
-                                              grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll)).y);
+                Vector2 grabbedPosition = new Vector2(grid.FilterPosition(filteredMousePosition + new Vector2((int)hScroll + grid.rect.left, 0),gridScale).x,
+                                                      grid.FilterPosition(filteredMousePosition + new Vector2(0, (int)vScroll + grid.rect.top), gridScale).y);
 
                 chunk.centerOfChunk = new ObjRect((int)grabbedPosition.x, (int)grabbedPosition.y, 40, 40);
                 if (Event.current.button == 0 && Event.current.type == EventType.mouseDown)
@@ -445,7 +447,7 @@ public class ChuckEditor : EditorWindow
                     {
                         Debug.Log(TextureList.getSelectedItemContent());
                         chunk.objects.Add(new LevelObj(new Rect((grid.FilterPosition(filteredMousePosition + new Vector2(hScroll + grid.rect.left, 0), gridScale).x),
-                                                 (grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll + grid.rect.top),gridScale).y),
+                                                                (grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll + grid.rect.top),gridScale).y),
                                                               grabbedObj.width,
                                                               grabbedObj.height)
                                                        , Resources.Load<Texture>("Objects/" + TextureList.getSelectedItemContent()), chunk.idAccumulator, ((activeLayer + 1) * 0.5f)));
@@ -836,8 +838,8 @@ public class ChuckEditor : EditorWindow
         SavedChunksList.EventHandler();
         TextureList.EventHandler();
 
-        hScroll = GUI.HorizontalScrollbar(new Rect(215, 490, 500, 10), hScroll, grid.basePatchWidth /gridScale, 0, Canvas.width - grid.rect.width);
-        vScroll = GUI.VerticalScrollbar(new Rect(715, 90, 10, 400), vScroll, grid.basePatchHeight/gridScale, 0, Canvas.height - grid.rect.height);
+        hScroll = GUI.HorizontalScrollbar(new Rect(215, 490, window.position.xMax - window.position.xMin - 235, 10), hScroll, grid.basePatchWidth / gridScale, 0, Canvas.width - grid.rect.width);
+        vScroll = GUI.VerticalScrollbar(new Rect(window.position.xMax - window.position.xMin - 20, 90, 10, 400), vScroll, grid.basePatchHeight/gridScale, 0, Canvas.height - grid.rect.height);
 
         vScroll = vScroll < 0 ? 0 : vScroll;
         hScroll = hScroll < 0 ? 0 : hScroll;
@@ -949,7 +951,7 @@ public class ChuckEditor : EditorWindow
                 layers[i] = false;
             }
         }
-
+        grid.rect.xMax = window.position.xMax - window.position.xMin - 25;
         grid.Draw();
         AssociativeSeletion();
         window.Repaint();
