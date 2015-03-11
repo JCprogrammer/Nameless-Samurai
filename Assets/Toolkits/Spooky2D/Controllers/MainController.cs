@@ -1,24 +1,34 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+public class MainController : MonoBehaviour
+{
 
-public class MainController : MonoBehaviour {
+    public static MainController instance;
+    public List<Motor> motors;
+    // Use this for initialization
 
-    public Motor[] motors;
-	// Use this for initialization
-	
-    void Start () {
-        motors = FindObjectsOfType<Motor>();  
-	}
-	
-	
-	void FixedUpdate () {
-        foreach (var item in motors)
+    void Start()
+    {
+        motors = new List<Motor>(FindObjectsOfType<Motor>());
+        instance = this;
+    }
+
+    public void addNewMotor(Motor motor)
+    {
+        motors.Add(motor);
+    }
+    void FixedUpdate()
+    {
+        for (int i = 0; i < motors.Count; i++)
         {
-            if (item != null)
+
+
+            if (motors[i] != null)
             {
-                if (item.enabled == true)
-                    item.MotoUpdate();
+                if (motors[i].enabled == true)
+                    motors[i].MotoUpdate();
             }
         }
-	}
+    }
 }

@@ -46,7 +46,7 @@ public class Vector2MovementMotor : Motor {
         {
             SMotion m1 = new SMotion();
             m1.content = transform.position;
-            positionMotionStack.Push(m1);
+            //positionMotionStack.Push(m1);
             transform.position += directionVector *
                 ((speed * (GlobalVariables.deltaTimeConst)) /
                  (float)GlobalVariables.minifier);

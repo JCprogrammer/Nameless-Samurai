@@ -65,8 +65,12 @@ public class JumpMotor : Vector2MovementMotor
     }
     void OnCollisionEnter2D(Collision2D coll)
     {
-        if (transform.position.y - (GetComponent<BoxCollider2D>().size.y/2 + (0.1f * transform.localScale.y)) >
-            coll.transform.position.y + (coll.transform.GetComponent<BoxCollider2D>().size.y/2))
+        //if (transform.position.y - (GetComponent<BoxCollider2D>().size.y/2 + (0.1f * transform.localScale.y)) >
+        //    coll.transform.position.y + (coll.transform.GetComponent<BoxCollider2D>().size.y/2))
+        //{
+
+        if (transform.position.y + ((GetComponent<BoxCollider2D>().size.y / 2 + 0.1f)) >
+       coll.transform.position.y + (coll.transform.GetComponent<BoxCollider2D>().size.y / 2))
         {
             allowedToJump = true;
             SendMessage("FixRotationDistortion",SendMessageOptions.DontRequireReceiver);

@@ -75,7 +75,7 @@ public class GravityMotor: Motor {
     //}
     void OnCollisionExit2D(Collision2D coll)
     {
-        Debug.Log(coll.collider.name);
+
         if (Physics2D.Raycast(transform.position - new Vector3(0,GetComponent<BoxCollider2D>().size.y/2 + 0.1f,0),Vector3.forward))
         {
             print("There is something in front of the object!");
