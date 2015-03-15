@@ -8,7 +8,10 @@ public class Samurai : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         animationMotor = transform.GetChild(0).GetComponent<SGAnimation>();
+
+        State.samurai = this;
         state = new Running();
+        
         if (state == null)
             Debug.Log("its null you fucking idiot");
 	}
@@ -17,8 +20,8 @@ public class Samurai : MonoBehaviour {
 	void Update () {
         if (state == null)
             Debug.Log("its null");
-        state.Update(this);
-        state.HandleInput(this);
+        state.Update();
+        state.HandleInput();
 	}
 }
 
@@ -26,13 +29,18 @@ namespace FSM
 {
     public class State
     {
+        public static Samurai samurai;
+        public State(Samurai samurai)
+        {
+            FSM.State.samurai = samurai;
+        }
         public State()
         {
-
+           
         }
-        public virtual void HandleInput(Samurai samurai)
+        public virtual void HandleInput( )
         {   }
-        public virtual void Update(Samurai samurai)
+        public virtual void Update( )
         {   }
     }
 
@@ -48,14 +56,14 @@ namespace FSM
             Debug.Log("Running State");
             if(FSMDiagram.instance != null)
             FSMDiagram.instance.ChangeState("Running");
+            samurai.animationMotor.ChangeAnimation(2);
             
         }
-        public override void HandleInput(Samurai samurai)
+        public override void HandleInput( )
         {
-            base.HandleInput(samurai);
+             ;
             if (Input.GetKeyUp(Slash1.keyTriggerType))
             {
-                samurai.animationMotor.ChangeAnimation(5);
                 samurai.state = new Slash1();
             }
             //if (Input.GetKeyDown(Slash1.keyTriggerType) &&
@@ -69,29 +77,24 @@ namespace FSM
                 if (timer > maxRiseAttackDelay)
                 {
                     samurai.state = new RisingAttack();
-                    samurai.animationMotor.ChangeAnimation(3);
-                    samurai.SendMessage("Jump");
                 }
                 else
                 {
                     samurai.state = new Jumping();
-                    samurai.animationMotor.ChangeAnimation(0);
-                    samurai.SendMessage("Jump");
                 }
             }
         }
-        public override void Update(Samurai samurai)
+        public override void Update( )
         {
             if (samurai.GetComponent<GravityMotor>().gravityOn)
             {
-                samurai.state = new Falling();
-                samurai.animationMotor.ChangeAnimation(1);
+                samurai.state = new Falling();;
             }
             if (Input.GetKey(SliceAttack.keyTriggerType))
                 timer += 0.002f;
             if (timer > maxSliceDelay)
                 samurai.state = new SliceAttack();
-            base.Update(samurai);
+             ;
         }
     }
 
@@ -108,28 +111,24 @@ namespace FSM
             Debug.Log("Slash1 State");
             timer = 0;
             FSMDiagram.instance.ChangeState("Slash1");
+            samurai.animationMotor.ChangeAnimation(5);
         }
-        public override void HandleInput(Samurai samurai)
+        public override void HandleInput( )
         {
-            base.HandleInput(samurai);
+             ;
             if (Input.GetKeyUp(Slash2.keyTriggerType))
             {
                 samurai.state = new Slash2();
-                samurai.animationMotor.ChangeAnimation(5);
             }
             if (Input.GetKeyUp(Jumping.keyTriggerType))
             {
                 if (timer > maxRiseAttackDelay)
                 {
-                    samurai.SendMessage("Jump");
-                    samurai.animationMotor.ChangeAnimation(3);
                     samurai.state = new RisingAttack();
                 }
                 else
                 {
                     samurai.state = new Jumping();
-                    samurai.SendMessage("Jump");
-                    samurai.animationMotor.ChangeAnimation(0);
                 }
             }
             if (Input.GetKey(SliceAttack.keyTriggerType))
@@ -137,15 +136,13 @@ namespace FSM
                 samurai.state = new SliceAttack();
             
         }
-        public override void Update(Samurai samurai)
+        public override void Update( )
         {
-            base.Update(samurai);
             timer += 0.002f;
 
             if (timer > maxSlashTime)
             {
                 samurai.state = new Sheathe();
-                samurai.animationMotor.ChangeAnimation(6);
             }
         }
     }
@@ -163,44 +160,38 @@ namespace FSM
             Debug.Log("Slash2 State");
             timer = 0;
             FSMDiagram.instance.ChangeState("Slash2");
+            samurai.animationMotor.ChangeAnimation(5);
         }
-        public override void HandleInput(Samurai samurai)
+        public override void HandleInput( )
         {
-            base.HandleInput(samurai);
+             ;
 
             if (Input.GetKeyUp(Slash3.keyTriggerType))
             {
-                samurai.animationMotor.ChangeAnimation(5);
                 samurai.state = new Slash3();
             }
             if (Input.GetKeyUp(Jumping.keyTriggerType))
             {
                 if (timer > maxRiseAttackDelay)
                 {
-                    samurai.SendMessage("Jump");
-                    samurai.animationMotor.ChangeAnimation(3);
                     samurai.state = new RisingAttack();
                 }
                 else
                 {
                     samurai.state = new Jumping();
-                    samurai.SendMessage("Jump");
-                    samurai.animationMotor.ChangeAnimation(0);
                 }
             }
             if (Input.GetKey(SliceAttack.keyTriggerType))
                 if (timer > maxSliceTime)
                     samurai.state = new SliceAttack();
         }
-        public override void Update(Samurai samurai)
+        public override void Update( )
         {
-            base.Update(samurai);
             timer += 0.002f;
 
             if (timer > maxSlashTime)
             {
                 samurai.state = new Sheathe();
-                samurai.animationMotor.ChangeAnimation(6);
             }
         }
     }
@@ -215,41 +206,35 @@ namespace FSM
         float maxRiseAttackDelay = 0.005f;
         public Slash3()
         {
+            samurai.animationMotor.ChangeAnimation(5);
             Debug.Log("Slash3 State");
             timer = 0;
             FSMDiagram.instance.ChangeState("Slash3");
         }
-        public override void HandleInput(Samurai samurai)
+        public override void HandleInput( )
         {
-            base.HandleInput(samurai);
+             ;
             if (Input.GetKeyUp(Jumping.keyTriggerType))
             {
                 if (timer > maxRiseAttackDelay)
                 {
-                    samurai.SendMessage("Jump");
-                    samurai.animationMotor.ChangeAnimation(3);
                     samurai.state = new RisingAttack();
                 }
                 else
                 {
                     samurai.state = new Jumping();
-                    samurai.SendMessage("Jump");
-                    samurai.animationMotor.ChangeAnimation(0);
                 }
             }
             if (Input.GetKey(SliceAttack.keyTriggerType))
                 if (timer > maxSliceTime)
                     samurai.state = new SliceAttack();
         }
-        public override void Update(Samurai samurai)
+        public override void Update( )
         {
-            base.Update(samurai);
             timer += 0.002f;
-
             if (timer > maxSlashTime)
             {
                 samurai.state = new Sheathe();
-                samurai.animationMotor.ChangeAnimation(6);
             }
         }
     }
@@ -265,20 +250,19 @@ namespace FSM
             timer = 0;
             Debug.Log("Sheathe State");
             FSMDiagram.instance.ChangeState("Sheathe");
+            samurai.animationMotor.ChangeAnimation(6);
         }
-        public override void HandleInput(Samurai samurai)
+        public override void HandleInput( )
         {
-            base.HandleInput(samurai);
         }
-        public override void Update(Samurai samurai)
+        public override void Update( )
         {
             timer += 0.001f;
             if (timer > sheathingTime)
             {
-                samurai.animationMotor.ChangeAnimation(2);
                 samurai.state = new Running();
             }
-            base.Update(samurai);
+             ;
         }
     }
 
@@ -293,21 +277,20 @@ namespace FSM
             Debug.Log("Jumping State");
             timer = 0;
             FSMDiagram.instance.ChangeState("Jumping");
+            samurai.animationMotor.ChangeAnimation(0);
+            samurai.SendMessage("Jump");
 
         }
-        public override void HandleInput(Samurai samurai)
+        public override void HandleInput( )
         {
-            base.HandleInput(samurai);
             //if (Input.GetKeyUp(Slash1.keyTriggerType))
             //{
             //    samurai.animationMotor.ChangeAnimation(4);
             //    samurai.state = new FallingAttack();
             //}
         }
-        public override void Update(Samurai samurai)
+        public override void Update( )
         {
-            base.Update(samurai);
-          
             if (Input.GetKey(SliceAttack.keyTriggerType))
                 timer += 0.002f;
           
@@ -315,10 +298,8 @@ namespace FSM
             {
                 samurai.state = new SmashAttack();
             }
-
             if (samurai.GetComponent<GravityMotor>().gravityOn)
             {
-                samurai.animationMotor.ChangeAnimation(1);
                 samurai.state = new Falling();
             }
         }
@@ -334,26 +315,24 @@ namespace FSM
             Debug.Log("Falling State");
             timer = 0;
             FSMDiagram.instance.ChangeState("Falling");
+            samurai.animationMotor.ChangeAnimation(1);
         }
-        public override void HandleInput(Samurai samurai)
+        public override void HandleInput( )
         {
-            base.HandleInput(samurai);
             if (Input.GetKeyUp(Slash1.keyTriggerType))
             {
-                samurai.animationMotor.ChangeAnimation(4);
                 samurai.state = new FallingAttack();
             }
         }
-        public override void Update(Samurai samurai)
+        public override void Update( )
         {
-            base.Update(samurai);
+             ;
             if (Input.GetKey(SliceAttack.keyTriggerType))
                 timer+= 0.002f;
             if (samurai.GetComponent<JumpMotor>().allowedToJump &&
                 !samurai.GetComponent<GravityMotor>().gravityOn)
             {
                 samurai.state = new Running();
-                samurai.animationMotor.ChangeAnimation(2);
             }
             if (timer > maxSmashTime)
             {
@@ -373,19 +352,21 @@ namespace FSM
             Debug.Log("RisingAttack State");
             timer = 0;
             FSMDiagram.instance.ChangeState("RisingAttack");
+            samurai.animationMotor.ChangeAnimation(3);
+            samurai.SendMessage("Jump");
         }
-        public override void HandleInput(Samurai samurai)
+        public override void HandleInput( )
         {
-            base.HandleInput(samurai);
+             ;
             //if (Input.GetKeyDown(Slash1.keyTriggerType))
             //{
             //    samurai.animationMotor.ChangeAnimation(4);
             //    samurai.state = new FallingAttack();
             //}
         }
-        public override void Update(Samurai samurai)
+        public override void Update( )
         {
-            base.Update(samurai);
+             ;
 
             if (Input.GetKey(SliceAttack.keyTriggerType))
                 timer += 0.002f;
@@ -411,15 +392,16 @@ namespace FSM
         {
             Debug.Log("FallingAttack State");
             FSMDiagram.instance.ChangeState("FallingAttack");
+            samurai.animationMotor.ChangeAnimation(4);
         }
 
-        public override void HandleInput(Samurai samurai)
+        public override void HandleInput( )
         {
-            base.HandleInput(samurai);
+             ;
         }
-        public override void Update(Samurai samurai)
+        public override void Update( )
         {
-            base.Update(samurai);
+             ;
             if (samurai.GetComponent<JumpMotor>().allowedToJump)
             {
                 samurai.state = new Sheathe();
@@ -441,13 +423,13 @@ namespace FSM
             Debug.Log("SmashAttack State");
             FSMDiagram.instance.ChangeState("SmashAttack");
         }
-        public override void HandleInput(Samurai samurai)
+        public override void HandleInput( )
         {
-            base.HandleInput(samurai);
+             ;
         }
-        public override void Update(Samurai samurai)
+        public override void Update( )
         {
-            base.Update(samurai);
+             ;
             if (samurai.GetComponent<JumpMotor>().allowedToJump)
                 timer += 0.002f;
             if (timer > maxCharacterDelay)
@@ -470,11 +452,11 @@ namespace FSM
             Debug.Log("SliceAttack State");
             FSMDiagram.instance.ChangeState("SliceAttack");
         }
-        public override void HandleInput(Samurai samurai)
+        public override void HandleInput( )
         {
-            base.HandleInput(samurai);
+             ;
         }
-        public override void Update(Samurai samurai)
+        public override void Update( )
         {
             timer += 0.002f;
             if (timer > maxSliceTime)
@@ -482,7 +464,7 @@ namespace FSM
                 samurai.state = new Sheathe();
                 samurai.animationMotor.ChangeAnimation(6);
             }
-            base.Update(samurai);
+             ;
         }
     }
 }

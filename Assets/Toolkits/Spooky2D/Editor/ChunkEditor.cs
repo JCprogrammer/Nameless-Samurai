@@ -440,7 +440,7 @@ public class ChuckEditor : EditorWindow
                                                          , Resources.Load<Texture>("Objects/" + TextureList.getSelectedItemContent()), chunk.idAccumulator,((activeLayer + 1) * 0.5f)));
                             ChunkItemList.Additem(new string[] { chunk.objects[chunk.objects.Count - 1].texture + "." + chunk.idAccumulator.ToString() });
                             chunk.idAccumulator++;
-                            SordChunkItems(); 
+                            SortChunkItems(); 
                         }
                     }
                     else
@@ -453,7 +453,7 @@ public class ChuckEditor : EditorWindow
                                                        , Resources.Load<Texture>("Objects/" + TextureList.getSelectedItemContent()), chunk.idAccumulator, ((activeLayer + 1) * 0.5f)));
                         TextureList.Additem(new string[] { chunk.objects[0].texture + "." + chunk.idAccumulator.ToString() });
                         chunk.idAccumulator++;
-                        SordChunkItems();
+                        SortChunkItems();
                     }
                 }
 
@@ -461,7 +461,7 @@ public class ChuckEditor : EditorWindow
             }
         }
     }
-    void SordChunkItems()
+    void SortChunkItems()
     {
         LevelObj unsortedObj = chunk.objects[chunk.objects.Count - 1];
         for (int i = chunk.objects.Count - 2; i >= 0 ; i--)

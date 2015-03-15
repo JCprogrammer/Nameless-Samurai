@@ -489,7 +489,7 @@ public class LevelCreatorWindow : EditorWindow
                                 //lst4.Additem(new string[] {level.objects[level.objects.Count-1].texture +"." + level.objects[level.objects.Count-1].id.ToString()});
                                 lst4.Additem(new string[] { level.objects[level.objects.Count - 1].texture + "." + level.idAccumulator.ToString() });
                                 level.idAccumulator++;
-                               
+                                SortChunkItems();
                             }    
                         
                         
@@ -505,6 +505,7 @@ public class LevelCreatorWindow : EditorWindow
                         //lst4.Additem(new string[] {level.objects[0].texture +"." + level.objects[0].id.ToString()});
                         lst4.Additem(new string[] { level.objects[0].texture + "." + level.idAccumulator.ToString() });
                         level.idAccumulator++;
+                        SortChunkItems();
                     }
                 }
 
@@ -581,6 +582,7 @@ public class LevelCreatorWindow : EditorWindow
                                          
                     lst4.Additem(new string[] { ((Chunk)level.objects[level.objects.Count - 1]).Name + "." + level.idAccumulator.ToString() });
                     level.idAccumulator++;
+                    SortChunkItems();
                     Debug.Log(((Chunk)level.objects[level.objects.Count - 1]).Name);
                     Debug.Log(((Chunk)level.objects[level.objects.Count - 1]).objects.Count);
                     ((Chunk)level.objects[level.objects.Count - 1]).centerOfChunk = new ObjRect((grid.FilterPosition(filteredMousePosition + new Vector2(hScroll + grid.rect.left, 0),gridScale).x),
@@ -868,6 +870,18 @@ public class LevelCreatorWindow : EditorWindow
         if (Camera.main.GetComponent<SoundController>() != null)
             Camera.main.GetComponent<SoundController>().startFrom = float.Parse(TimeSpan);
 
+    }
+    void SortChunkItems()
+    {
+        LevelObj unsortedObj = level.objects[chunk.objects.Count - 1];
+        for (int i = level.objects.Count - 2; i >= 0; i--)
+        {
+            if (unsortedObj.position.depth > level.objects[i].position.depth)
+            {
+                level.objects[level.objects.Count - 1] = level.objects[i];
+                level.objects[i] = unsortedObj;
+            }
+        }
     }
     void RefreshEditor()
     {
