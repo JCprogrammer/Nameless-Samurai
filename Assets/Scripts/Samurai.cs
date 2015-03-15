@@ -1,13 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections;
 using FSM;
+public class SamuraiAnimationMotor
+{
+    public SGAnimation[] animationMotor;
+    public void ChangeAnimation(int index)
+    {
+        foreach (var item in animationMotor)
+        {
+            item.ChangeAnimation(index);
+        }
+    }
+
+}
 public class Samurai : MonoBehaviour {
 
-    public SGAnimation animationMotor;
+    public SamuraiAnimationMotor animationMotor;
     public State state;
 	// Use this for initialization
 	void Start () {
-        animationMotor = transform.GetChild(0).GetComponent<SGAnimation>();
+        animationMotor = new SamuraiAnimationMotor(); 
+            animationMotor.animationMotor = transform.GetComponentsInChildren<SGAnimation>();
 
         State.samurai = this;
         state = new Running();

@@ -130,6 +130,8 @@ public class SGAnimation : Motor{
     }
    public void ChangeAnimation(int subAnimation)
     {
+        if (subAnimation > subAnimations.Length - 1)
+            return;
         currentAnimation = subAnimations[subAnimation];
         currenttextureId = currentAnimation.indexBox[0];
         isAnimating = true;
