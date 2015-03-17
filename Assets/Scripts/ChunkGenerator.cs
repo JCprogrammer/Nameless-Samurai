@@ -3,11 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 public class ChunkGenerator : Motor
 {
-    //public List<GenerationSample> samples;
-    //public  GenerationSample currentSample;
-    public List<GameObject> chunks;
-    public GameObject currentChunk;
 
+    [HideInInspector]
+    public List<GameObject> chunks;
+    [HideInInspector]
+    public GameObject currentChunk;
+    [HideInInspector]
     public float timeForNextGeneration = 0;
     public float HorizontalSpeed;
     bool isFadingIn;
@@ -17,15 +18,14 @@ public class ChunkGenerator : Motor
         base.Ignite();
         Generate();
     }
-
     void Generate()
     {
-        Random.seed = System.DateTime.Now.Millisecond;
+       // Random.seed = System.DateTime.Now.Millisecond;
         int randomIndex = Random.Range(0, chunks.Count);
         Motor sample = (Instantiate(chunks[randomIndex], transform.position, Quaternion.identity) as GameObject).GetComponent<Motor>();
         if (sample != null)
         {
-            MainController.instance.addNewMotor(sample);
+            //MainController.instance.addNewMotor(sample);
             Motor[] children = new Motor[0];
             if (sample.transform.childCount > 0)
                 children = sample.GetComponentsInChildren<Motor>();
@@ -46,7 +46,6 @@ public class ChunkGenerator : Motor
             Generate();
         }
     }
-
     protected override void KillPower()
     {
         base.KillPower();

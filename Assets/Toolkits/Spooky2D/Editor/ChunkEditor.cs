@@ -361,6 +361,8 @@ public class ChuckEditor : EditorWindow
                 }
                 else if (Event.current.button == 0 && Event.current.type == EventType.mouseDrag)
                 {
+                    if (selectedLevelObj.position.depth != 40 - ((activeLayer + 1) * 5))
+                        return;
                     if (dynamicSelection.objects.Count == 0)
                     {
                         if (selectedLevelObj != null)
@@ -439,8 +441,7 @@ public class ChuckEditor : EditorWindow
                                                                   grabbedObj.height)
                                                          , Resources.Load<Texture>("Objects/" + TextureList.getSelectedItemContent()), chunk.idAccumulator,((activeLayer + 1) * 0.5f)));
                             ChunkItemList.Additem(new string[] { chunk.objects[chunk.objects.Count - 1].texture + "." + chunk.idAccumulator.ToString() });
-                            chunk.idAccumulator++;
-                            SortChunkItems(); 
+                            chunk.idAccumulator++; 
                         }
                     }
                     else
@@ -453,7 +454,6 @@ public class ChuckEditor : EditorWindow
                                                        , Resources.Load<Texture>("Objects/" + TextureList.getSelectedItemContent()), chunk.idAccumulator, ((activeLayer + 1) * 0.5f)));
                         TextureList.Additem(new string[] { chunk.objects[0].texture + "." + chunk.idAccumulator.ToString() });
                         chunk.idAccumulator++;
-                        SortChunkItems();
                     }
                 }
 
@@ -461,18 +461,7 @@ public class ChuckEditor : EditorWindow
             }
         }
     }
-    void SortChunkItems()
-    {
-        LevelObj unsortedObj = chunk.objects[chunk.objects.Count - 1];
-        for (int i = chunk.objects.Count - 2; i >= 0 ; i--)
-        {
-            if (unsortedObj.position.depth > chunk.objects[i].position.depth)
-            {
-                chunk.objects[chunk.objects.Count - 1] = chunk.objects[i];
-                chunk.objects[i] = unsortedObj;
-            }
-        }
-    }
+    
     void DeleteItem()
     {
         if (Event.current.alt)
@@ -555,7 +544,7 @@ public class ChuckEditor : EditorWindow
     void LoadChunk(string chunkName)
     {
         chunk = CubeFile.DeSerializeObject<Chunk>(chunkName,"Chunks/");
-       
+        autoAdjustCOC = false;
             foreach (var item in chunk.objects)
             {
                 item.position = new ObjRect(item.position.left + chunk.centerOfChunk.left,
@@ -846,36 +835,41 @@ public class ChuckEditor : EditorWindow
 
         grid.xMin = -hScroll * gridScale;
         grid.yMin = -vScroll * gridScale;
-        foreach (var item in chunk.objects)
+        for (int i = 0; i < layers.Length; i++)
         {
-            if (dynamicSelection.objects.Contains(item))
-                continue;
-            if (item.position.depth == ((activeLayer + 1) * 0.5f))
+            foreach (var item in chunk.objects)
             {
-                Rect tmpRect = new Rect((((item.position.left - grid.rect.left - hScroll) * gridScale) + grid.rect.left),
-                               (((item.position.top - grid.rect.top - vScroll) * gridScale) + grid.rect.top),
-                               item.position.width * gridScale,
-                               item.position.height * gridScale);
-                //if (!(tmpRect.xMin < grid.rect.xMin ||
-                //     tmpRect.yMin < grid.rect.yMin ||
-                //     tmpRect.xMax > grid.rect.xMax ||
-                //     tmpRect.yMax > grid.rect.yMax))
-                //    GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
-                RTNew(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
-            }
+                if (item.position.depth !=  ((i + 1) * 0.5f))
+                    continue;
+                if (dynamicSelection.objects.Contains(item))
+                    continue;
+                if (item.position.depth == ((activeLayer + 1) * 0.5f))
+                {
+                    Rect tmpRect = new Rect((((item.position.left - grid.rect.left - hScroll) * gridScale) + grid.rect.left),
+                                   (((item.position.top - grid.rect.top - vScroll) * gridScale) + grid.rect.top),
+                                   item.position.width * gridScale,
+                                   item.position.height * gridScale);
+                    //if (!(tmpRect.xMin < grid.rect.xMin ||
+                    //     tmpRect.yMin < grid.rect.yMin ||
+                    //     tmpRect.xMax > grid.rect.xMax ||
+                    //     tmpRect.yMax > grid.rect.yMax))
+                    //    GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+                    RTNew(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+                }
 
-            if (GetActiveLayer().Contains((int)((item.position.depth) / 0.5f)))
-            {
-                Rect tmpRect = new Rect((((item.position.left - grid.rect.left - hScroll) * gridScale) + grid.rect.left),
-                               (((item.position.top - grid.rect.top - vScroll) * gridScale) + grid.rect.top),
-                               item.position.width * gridScale,
-                               item.position.height * gridScale);
-                //if (!(tmpRect.xMin < grid.rect.xMin ||
-                //     tmpRect.yMin < grid.rect.yMin ||
-                //     tmpRect.xMax > grid.rect.xMax ||
-                //     tmpRect.yMax > grid.rect.yMax))
-                //    GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
-                RTNew(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+                if (GetActiveLayer().Contains((int)((item.position.depth) / 0.5f)))
+                {
+                    Rect tmpRect = new Rect((((item.position.left - grid.rect.left - hScroll) * gridScale) + grid.rect.left),
+                                   (((item.position.top - grid.rect.top - vScroll) * gridScale) + grid.rect.top),
+                                   item.position.width * gridScale,
+                                   item.position.height * gridScale);
+                    //if (!(tmpRect.xMin < grid.rect.xMin ||
+                    //     tmpRect.yMin < grid.rect.yMin ||
+                    //     tmpRect.xMax > grid.rect.xMax ||
+                    //     tmpRect.yMax > grid.rect.yMax))
+                    //    GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+                    RTNew(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+                }
             }
         }
         Rect tmpR = new Rect(); 

@@ -13,7 +13,7 @@ public class CubeFile {
 		bFormatter.Serialize(stream, objectToSerialize);
 		stream.Close();
 	}
-	
+    
 	public static T DeSerializeObject<T>(string filename,string subFolder = "")
 	{
 		try {

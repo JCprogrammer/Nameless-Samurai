@@ -419,13 +419,14 @@ public class LevelCreatorWindow : EditorWindow
                 }
                 else if (Event.current.button == 0 && Event.current.type == EventType.mouseDrag)
                 {
-
+                    if(selectedLevelObj.position.depth != 40 - ((activeLayer + 1) * 5))
+                        return;
                     if (level.objects.Count > 0)
                     {
                         Vector2 grabbedPosition = new Vector2((grid.FilterPosition(filteredMousePosition + new Vector2(hScroll + grid.rect.left, 0), gridScale).x),
                                                            (grid.FilterPosition(filteredMousePosition + new Vector2(0, vScroll + grid.rect.top), gridScale).y));
 
-                        selectedLevelObj.position = new ObjRect(grabbedPosition.x, grabbedPosition.y, selectedLevelObj.position.width, selectedLevelObj.position.height, 40 - ((activeLayer + 1) * 5));
+                        selectedLevelObj.position = new ObjRect(grabbedPosition.x, grabbedPosition.y, selectedLevelObj.position.width, selectedLevelObj.position.height, selectedLevelObj.position.depth);
                         SelectItemOnScene("");
                     }
                     
@@ -489,7 +490,7 @@ public class LevelCreatorWindow : EditorWindow
                                 //lst4.Additem(new string[] {level.objects[level.objects.Count-1].texture +"." + level.objects[level.objects.Count-1].id.ToString()});
                                 lst4.Additem(new string[] { level.objects[level.objects.Count - 1].texture + "." + level.idAccumulator.ToString() });
                                 level.idAccumulator++;
-                                SortChunkItems();
+                            
                             }    
                         
                         
@@ -505,7 +506,6 @@ public class LevelCreatorWindow : EditorWindow
                         //lst4.Additem(new string[] {level.objects[0].texture +"." + level.objects[0].id.ToString()});
                         lst4.Additem(new string[] { level.objects[0].texture + "." + level.idAccumulator.ToString() });
                         level.idAccumulator++;
-                        SortChunkItems();
                     }
                 }
 
@@ -582,7 +582,7 @@ public class LevelCreatorWindow : EditorWindow
                                          
                     lst4.Additem(new string[] { ((Chunk)level.objects[level.objects.Count - 1]).Name + "." + level.idAccumulator.ToString() });
                     level.idAccumulator++;
-                    SortChunkItems();
+                    
                     Debug.Log(((Chunk)level.objects[level.objects.Count - 1]).Name);
                     Debug.Log(((Chunk)level.objects[level.objects.Count - 1]).objects.Count);
                     ((Chunk)level.objects[level.objects.Count - 1]).centerOfChunk = new ObjRect((grid.FilterPosition(filteredMousePosition + new Vector2(hScroll + grid.rect.left, 0),gridScale).x),
@@ -678,7 +678,10 @@ public class LevelCreatorWindow : EditorWindow
             cam = new GameObject("Main Camera");
             camCom = cam.AddComponent<Camera>();
         }
+        
         camCom = cam.GetComponent<Camera>();
+        if (camCom.isOrthoGraphic == true)
+            return;
         camCom.isOrthoGraphic = true;
         camCom.orthographicSize = 15;
         if (lst4.items.Count > 0)
@@ -871,18 +874,7 @@ public class LevelCreatorWindow : EditorWindow
             Camera.main.GetComponent<SoundController>().startFrom = float.Parse(TimeSpan);
 
     }
-    void SortChunkItems()
-    {
-        LevelObj unsortedObj = level.objects[chunk.objects.Count - 1];
-        for (int i = level.objects.Count - 2; i >= 0; i--)
-        {
-            if (unsortedObj.position.depth > level.objects[i].position.depth)
-            {
-                level.objects[level.objects.Count - 1] = level.objects[i];
-                level.objects[i] = unsortedObj;
-            }
-        }
-    }
+   
     void RefreshEditor()
     {
         lst3 = new Listbox(new string[] { "None" }, "LevelBehaviorHirarchy", new Rect(180, 530, 180, 140), 20);
@@ -1199,56 +1191,49 @@ public class LevelCreatorWindow : EditorWindow
         grid.xMin = -hScroll*gridScale;
         grid.yMin = -vScroll*gridScale;
         grid.rect.xMax = window.position.xMax - window.position.xMin - 25;
+      
         grid.Draw();
-        MoveChunk();
-        GenerateChunk();
-        foreach (var item in level.objects)
+        for (int i = 0; i < layers.Length; i++)
         {
-            if (dynamicSelection.objects.Contains(item))
-                continue;
-            if (item is Chunk)
+            foreach (var item in level.objects)
             {
-                //if (item.position.depth == 40 - ((activeLayer + 1) * 5))
-                //{
-                if (GetActiveLayer().Contains((40 - (int)item.position.depth) / 5))
+                if (item.position.depth != 40 - ((i + 1) * 5))
+                    continue;
+                if (dynamicSelection.objects.Contains(item))
+                    continue;
+                if (item is Chunk)
                 {
-                    foreach (var chunkObject in ((Chunk)item).objects)
+                    if (GetActiveLayer().Contains((40 - (int)item.position.depth) / 5))
                     {
-
-                        //if (chunkObject.position.depth == 40 - ((activeLayer + 1) * 5))
-                        
+                        foreach (var chunkObject in ((Chunk)item).objects)
+                        {
                             Rect tmpRect = new Rect((chunkObject.position.left + ((Chunk)item).centerOfChunk.left - grid.rect.left - hScroll) * gridScale + grid.rect.left,
                                                     (chunkObject.position.top + ((Chunk)item).centerOfChunk.top - grid.rect.top - vScroll) * gridScale + grid.rect.top,
                                                     chunkObject.position.width * gridScale,
                                                     chunkObject.position.height * gridScale);
-                            //if (!(tmpRect.xMin < grid.rect.xMin ||
-                            //     tmpRect.yMin < grid.rect.yMin ||
-                            //     tmpRect.xMax > grid.rect.xMax ||
-                            //     tmpRect.yMax > grid.rect.yMax))
-                            //    GUI.DrawTexture(tmpRect, Resources.Load<Texture>("Objects/" + chunkObject.texture));
+
                             RTNew(tmpRect, Resources.Load<Texture>("Objects/" + chunkObject.texture));
+                        }
 
+                        Rect pivotPos = new Rect((((Chunk)item).centerOfChunk.left - 5 - hScroll - grid.rect.left) * gridScale + grid.rect.left,
+                                                 (((Chunk)item).centerOfChunk.top - 5 - vScroll - grid.rect.top) * gridScale + grid.rect.top,
+                                                 10, 10);
+                        RTNew(pivotPos, Resources.Load<Texture>("plus"));
                     }
-                    Rect pivotPos = new Rect((((Chunk)item).centerOfChunk.left - 5 - hScroll - grid.rect.left) * gridScale + grid.rect.left,
-                                             (((Chunk)item).centerOfChunk.top - 5 - vScroll - grid.rect.top)*gridScale + grid.rect.top,
-                                             10, 10);
-                    RTNew(pivotPos, Resources.Load<Texture>("plus"));
-
+                    continue;
                 }
-                continue;
-            }
 
 
-            if (GetActiveLayer().Contains((40 - (int)item.position.depth) / 5))
-            {
-                Rect tmpRect = new Rect((((item.position.left - grid.rect.left - hScroll) * gridScale) + grid.rect.left),
-                               (((item.position.top - grid.rect.top - vScroll) * gridScale) + grid.rect.top),
-                               item.position.width * gridScale,
-                               item.position.height * gridScale);
-                RTNew(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+                if (GetActiveLayer().Contains((40 - (int)item.position.depth) / 5))
+                {
+                    Rect tmpRect = new Rect((((item.position.left - grid.rect.left - hScroll) * gridScale) + grid.rect.left),
+                                   (((item.position.top - grid.rect.top - vScroll) * gridScale) + grid.rect.top),
+                                   item.position.width * gridScale,
+                                   item.position.height * gridScale);
+                    RTNew(tmpRect, Resources.Load<Texture>("Objects/" + item.texture));
+                }
             }
         }
-
         foreach (var item in dynamicSelection.objects)
         {
             if (GetActiveLayer().Contains((40 - (int)item.position.depth) / 5))
@@ -1306,6 +1291,8 @@ public class LevelCreatorWindow : EditorWindow
         if (level.cameraPivot != null)
             GUI.DrawTexture(ChangeType(level.cameraPivot), Resources.Load<Texture>("CameraPivot"));
         MovingCamera();
+        GenerateChunk();
+        MoveChunk();
         TimeBar();
         AssociativeSeletion();
         window.Repaint();
