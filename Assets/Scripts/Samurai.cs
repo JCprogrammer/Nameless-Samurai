@@ -69,6 +69,7 @@ namespace FSM
             Debug.Log("Running State");
             if(FSMDiagram.instance != null)
             FSMDiagram.instance.ChangeState("Running");
+            samurai.GetComponent<Vector2MovementMotor>().Ignite();
             samurai.animationMotor.ChangeAnimation(2);
             
         }
@@ -111,6 +112,31 @@ namespace FSM
         }
     }
 
+    public class HittingGround : State
+    {
+        float timer;
+        float maxSliceDelay = 0.03f;
+        public HittingGround()
+        {
+            timer = 0;
+            Debug.Log("HittingGround State");
+            samurai.animationMotor.ChangeAnimation(7);
+            samurai.GetComponent<Vector2MovementMotor>().KillPower();
+
+        }
+        public override void HandleInput()
+        {
+            
+        }
+        public override void Update()
+        {
+            timer += 0.002f;
+            if (timer > maxSliceDelay)
+                samurai.state = new Running();
+            ;
+        }
+    }
+
 
     public class Slash1 : State
     {
@@ -125,6 +151,7 @@ namespace FSM
             timer = 0;
             FSMDiagram.instance.ChangeState("Slash1");
             samurai.animationMotor.ChangeAnimation(5);
+            samurai.GetComponent<Vector2MovementMotor>().KillPower();
         }
         public override void HandleInput( )
         {
@@ -264,6 +291,7 @@ namespace FSM
             Debug.Log("Sheathe State");
             FSMDiagram.instance.ChangeState("Sheathe");
             samurai.animationMotor.ChangeAnimation(6);
+            samurai.GetComponent<Vector2MovementMotor>().KillPower();
         }
         public override void HandleInput( )
         {
@@ -345,7 +373,7 @@ namespace FSM
             if (samurai.GetComponent<JumpMotor>().allowedToJump &&
                 !samurai.GetComponent<GravityMotor>().gravityOn)
             {
-                samurai.state = new Running();
+                samurai.state = new HittingGround();
             }
             if (timer > maxSmashTime)
             {

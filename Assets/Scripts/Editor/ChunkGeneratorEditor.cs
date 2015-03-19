@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEditor;
+using System.Collections.Generic;
 [CustomEditor(typeof(ChunkGenerator))]
 public class ChunkGeneratorEditor : Editor
 {
@@ -29,8 +30,8 @@ public class ChunkGeneratorEditor : Editor
         string[] savedChunkNames = CubeFile.CheckDirectory("SavedFiles/Chunks");
         if (GUILayout.Button("Build Prefabs"))
             BuildChunkPrefab(savedChunkNames);
-        if (generator.chunks.Length < savedChunkNames.Length)
-            generator.chunks = new bool[savedChunkNames.Length];
+        if (generator.chunksSelected.Length < savedChunkNames.Length)
+            generator.chunksSelected = new bool[savedChunkNames.Length];
 
         float maxX = 0;
         float minX = 0;
@@ -41,7 +42,7 @@ public class ChunkGeneratorEditor : Editor
             if (!savedChunkNames[j].Contains(searchPhrase))
                 continue;
             if (!(showSelecteds && showNotSelecteds))
-                if ((showSelecteds && !generator.chunks[j]) || (showNotSelecteds && generator.chunks[j])
+                if ((showSelecteds && !generator.chunksSelected[j]) || (showNotSelecteds && generator.chunksSelected[j])
                     || (!showSelecteds && !showNotSelecteds))
                     continue;
             Chunk c1 = CubeFile.DeSerializeObject<Chunk>(savedChunkNames[j], "Chunks");
@@ -82,12 +83,12 @@ public class ChunkGeneratorEditor : Editor
             else
                 ChunksRect = GUILayoutUtility.GetRect(200, 30);
             Color guiDefColor = GUI.color;
-            if (generator.chunks[j])
+            if (generator.chunksSelected[j])
                 GUI.color = Color.green;
             else
                 GUI.color = Color.red;
-            if (GUI.Button(new Rect(ChunksRect.xMax - 105, ChunksRect.yMax - 24, 100, 20), !generator.chunks[j] ? "Select" : "Deselect"))
-                generator.chunks[j] = true ^ generator.chunks[j];
+            if (GUI.Button(new Rect(ChunksRect.xMax - 105, ChunksRect.yMax - 24, 100, 20), !generator.chunksSelected[j] ? "Select" : "Deselect"))
+                generator.chunksSelected[j] = true ^ generator.chunksSelected[j];
             GUI.color = guiDefColor;
             GUI.Label(new Rect(ChunksRect.xMax - 210, ChunksRect.yMax - 24, 100, 20), c1.Name);
             GUI.Label(new Rect(ChunksRect.xMax - 400, ChunksRect.yMax - 24, 200, 20), "Chunk Size: " +(maxX - minX).ToString() + " X " + (maxY - minY).ToString());
@@ -95,17 +96,15 @@ public class ChunkGeneratorEditor : Editor
         
     }
 
-    void CreateSceneObject(LevelObj item, Transform parent = null)
+    GameObject CreateSceneObject(LevelObj item, Transform parent = null)
     {
-
+        bool isChunk = false;
         if (item is Chunk)
         {
             Debug.Log("Is Chunk");
-            GameObject ChunkContainer = GameObject.Find(((Chunk)item).Name + "." + item.id.ToString());
-            if (ChunkContainer == null)
-                ChunkContainer = new GameObject(((Chunk)item).Name + "." + item.id.ToString());
-            else
-                return;
+
+            GameObject ChunkContainer = new GameObject(((Chunk)item).Name + "." + item.id.ToString());
+
             ChunkContainer.transform.position = new Vector3(1 * (float)(((Chunk)item).centerOfChunk.left) /
                                                  GlobalVariables.minifier, -1 * (float)(((Chunk)item).centerOfChunk.top) /
                                                  GlobalVariables.minifier, 0) + new Vector3(20.0f / GlobalVariables.minifier, 40.0f / GlobalVariables.minifier, item.position.depth);
@@ -126,89 +125,114 @@ public class ChunkGeneratorEditor : Editor
             }
             Debug.Log(xMax + " " + xMin);
             cData.chunkLength = (xMax - xMin) / GlobalVariables.minifier;
-            return;
-        }
-        GameObject sceneObj;
-        MeshFilter tmpFilter;
-        MeshRenderer tmpRenderer;
-        Material objMaterial;
-        GameObject sceneObjContainer = GameObject.Find(item.texture + "." + item.id.ToString());
-        if (sceneObjContainer == null || parent != null)
-        {
-            sceneObjContainer = new GameObject(item.texture + "." + item.id.ToString());
-            sceneObj = new GameObject(item.texture + "." + item.id.ToString() + "Sprite");
-            tmpFilter = sceneObj.AddComponent<MeshFilter>();
-            tmpRenderer = sceneObj.AddComponent<MeshRenderer>();
-            objMaterial = new Material(Resources.Load<Material>("SourceMaterial"));
-            
+            DestroyImmediate(ChunkContainer);
+            return (AssetDatabase.LoadAssetAtPath("Assets/ChunkPrefabs/Prefabs/" + ((Chunk)item).Name + "." + item.id.ToString() + ".prefab", typeof(GameObject)) as GameObject);
         }
         else
         {
-            sceneObj = sceneObjContainer.transform.GetChild(0).gameObject;
-            tmpFilter = sceneObj.GetComponent<MeshFilter>();
-            tmpRenderer = sceneObj.GetComponent<MeshRenderer>();
-            objMaterial = tmpRenderer.material;
-        }
+            GameObject sceneObj;
+            MeshFilter tmpFilter;
+            MeshRenderer tmpRenderer;
+            Material objMaterial = AssetDatabase.LoadAssetAtPath("Assets/ChunkPrefabs/Materials/" + item.texture + item.id.ToString() + ".mat", typeof(Material)) as Material;
+            GameObject sceneObjContainer = GameObject.Find(item.texture + "." + item.id.ToString());
+            if (sceneObjContainer == null || parent != null)
+            {
+                sceneObjContainer = new GameObject(item.texture + "." + item.id.ToString());
+                sceneObj = new GameObject(item.texture + "." + item.id.ToString() + "Sprite");
+                tmpFilter = sceneObj.AddComponent<MeshFilter>();
+                tmpRenderer = sceneObj.AddComponent<MeshRenderer>();
+                if (objMaterial == null)
+                {
+                    objMaterial = new Material(Shader.Find("Transparent/Diffuse"));
+                    AssetDatabase.CreateAsset(objMaterial, "Assets/ChunkPrefabs/Materials/" + item.texture + item.id.ToString() + ".mat");
+                }
+            }
+            else
+            {
+                sceneObj = sceneObjContainer.transform.GetChild(0).gameObject;
+                tmpFilter = sceneObj.GetComponent<MeshFilter>();
+                tmpRenderer = sceneObj.GetComponent<MeshRenderer>();
+                objMaterial = tmpRenderer.material;
+            }
 
-        Mesh mesh = new Mesh();
+            string meshName = item.position.width.ToString() + "X" + item.position.height;
+            Mesh mesh = AssetDatabase.LoadAssetAtPath("Assets/ChunkPrefabs/" + meshName + ".asset", typeof(Mesh)) as Mesh;
 
-        mesh.vertices = new Vector3[] {new Vector3(0, 0, 0), 
+            if (mesh == null)
+            {
+                mesh = new Mesh();
+                mesh.vertices = new Vector3[] {new Vector3(0, 0, 0), 
 			new Vector3(0, (float)item.position.height/GlobalVariables.minifier, 0), 
 			new Vector3((float)item.position.width/GlobalVariables.minifier, 0 , 0), 
 			new Vector3((float)item.position.width/GlobalVariables.minifier, (float)item.position.height/GlobalVariables.minifier,0)
 			};
 
-        mesh.uv = new Vector2[] {new Vector2(0, 0), 
+                mesh.uv = new Vector2[] {new Vector2(0, 0), 
 			new Vector2(0, 1), 
 			new Vector2(1,0) , 
 			new Vector2(1, 1)};
-        mesh.triangles = new int[] { 0, 1, 2, 3, 2, 1 };
-        mesh.normals = new Vector3[] { new Vector3(0, 0, -1), new Vector3(0, 0, -1), new Vector3(0, 0, -1), new Vector3(0, 0, -1) };
-        //mesh.bounds = new Bounds (new Vector2 (mesh.bounds.center.x + (mesh.bounds.size.x / 2), mesh.bounds.center.y + (mesh.bounds.size.y / 2)), mesh.bounds.size);
-       
-        tmpFilter.mesh = mesh;
-        objMaterial.SetTexture(0, Resources.Load<Texture>("Objects/" + item.texture));
-        Shader defShader = Shader.Find("Transparent/Diffuse");
+                mesh.triangles = new int[] { 0, 1, 2, 3, 2, 1 };
+                mesh.normals = new Vector3[] { new Vector3(0, 0, -1), new Vector3(0, 0, -1), new Vector3(0, 0, -1), new Vector3(0, 0, -1) };
+                //mesh.bounds = new Bounds (new Vector2 (mesh.bounds.center.x + (mesh.bounds.size.x / 2), mesh.bounds.center.y + (mesh.bounds.size.y / 2)), mesh.bounds.size);
+                AssetDatabase.CreateAsset(mesh, "Assets/ChunkPrefabs/" + meshName + ".asset");
+            }
 
-        objMaterial.shader = defShader;
-        objMaterial.color = new Color(1, 1, 1);
-        tmpRenderer.material = objMaterial;
 
-        Camera levelCamera = SceneView.FindObjectOfType<Camera>();
 
-        Debug.Log("______________________ Screen to world point: " + levelCamera.ScreenToWorldPoint(new Vector3(item.position.left, item.position.top, 0)));
 
-        sceneObj.transform.parent = sceneObjContainer.transform;
-        if ((sceneObjContainer.GetComponent<BoxCollider2D>() == null) && item.position.depth == 0)
-            sceneObjContainer.AddComponent<BoxCollider2D>();
+            tmpFilter.mesh = mesh;
+            objMaterial.SetTexture(0, Resources.Load<Texture>("Objects/" + item.texture));
+            Shader defShader = Shader.Find("Transparent/Diffuse");
 
-        if (sceneObjContainer.GetComponent<BoxCollider2D>() != null)
-            sceneObjContainer.GetComponent<BoxCollider2D>().size = mesh.bounds.size;
+            objMaterial.shader = defShader;
+            objMaterial.color = new Color(1, 1, 1);
+            tmpRenderer.material = objMaterial;
 
-        sceneObj.transform.localPosition = new Vector3(-1 * (float)item.position.width /
-                                                        (GlobalVariables.minifier * 2), -1 * (float)item.position.height /
-                                                        (GlobalVariables.minifier * 2), 0);
+            Camera levelCamera = SceneView.FindObjectOfType<Camera>();
 
-        sceneObjContainer.transform.position = new Vector3(1 * (float)item.position.left /
-                                                           GlobalVariables.minifier, -1 * (float)item.position.top /
-                                                           GlobalVariables.minifier, 0) + new Vector3((1 * (float)item.position.width /
-                                                                                                        (GlobalVariables.minifier * 2)) + 1, (-1 * (float)item.position.height /
-                                                                                                     (GlobalVariables.minifier * 2)) + 2, parent == null ? item.position.depth : parent.position.z - item.position.depth);
-        if (parent != null)
-        {
+            Debug.Log("______________________ Screen to world point: " + levelCamera.ScreenToWorldPoint(new Vector3(item.position.left, item.position.top, 0)));
+
+            sceneObj.transform.parent = sceneObjContainer.transform;
+            if ((sceneObjContainer.GetComponent<BoxCollider2D>() == null) && item.position.depth == 0)
+                sceneObjContainer.AddComponent<BoxCollider2D>();
+
+            if (sceneObjContainer.GetComponent<BoxCollider2D>() != null)
+                sceneObjContainer.GetComponent<BoxCollider2D>().size = mesh.bounds.size;
+
+            sceneObj.transform.localPosition = new Vector3(-1 * (float)item.position.width /
+                                                            (GlobalVariables.minifier * 2), -1 * (float)item.position.height /
+                                                            (GlobalVariables.minifier * 2), 0);
+
+            sceneObjContainer.transform.position = new Vector3(1 * (float)item.position.left /
+                                                               GlobalVariables.minifier, -1 * (float)item.position.top /
+                                                               GlobalVariables.minifier, 0) + new Vector3((1 * (float)item.position.width /
+                                                                                                            (GlobalVariables.minifier * 2)) + 1, (-1 * (float)item.position.height /
+                                                                                                   (GlobalVariables.minifier * 2)) + 2, parent == null ? item.position.depth : parent.position.z - item.position.depth);
+            string chunkObjName = "";
+
             sceneObjContainer.transform.position += parent.position - new Vector3(25 / GlobalVariables.minifier, 50 / GlobalVariables.minifier, 0);
             sceneObjContainer.transform.parent = parent;
+            chunkObjName = parent.name;
+            PrefabUtility.CreatePrefab("Assets/ChunkPrefabs/Prefabs/" + parent.name + ".prefab", parent.gameObject);
+
+
+            return null;
         }
+        
+       
     }
 
     void BuildChunkPrefab(string[] chunkNames)
     {
+       
          ChunkGenerator generator = target as ChunkGenerator;
+         generator.chunks = new List<GameObject>();
         for (int i = 0; i < chunkNames.Length; i++)
         {
-            if (!generator.chunks[i])
+            if (!generator.chunksSelected[i])
                 continue;
-            CreateSceneObject(CubeFile.DeSerializeObject<Chunk>(chunkNames[i], "Chunks"));
+            generator.chunks.Add(CreateSceneObject(CubeFile.DeSerializeObject<Chunk>(chunkNames[i], "Chunks")));
+            
         }
     }
 }

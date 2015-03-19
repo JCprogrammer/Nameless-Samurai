@@ -46,7 +46,7 @@ public class AdvancedV2DMotor : Vector2MovementMotor {
     //         (float)GlobalVariables.minifier);
     //}
     
-    protected override void KillPower()
+    public override void KillPower()
     {
         base.KillPower();
         Debug.Log("Kill Power Triggered");

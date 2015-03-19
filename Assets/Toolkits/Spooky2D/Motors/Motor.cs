@@ -41,7 +41,7 @@ public class Motor : MonoBehaviour
 
         switchedOn = true;
     }
-    protected virtual void KillPower()
+    public virtual void KillPower()
     {
         if (DebuggingMode)
             Debug.Log(gameObject.name + "  KillPower Time: " + timeSinceIgnition);
