@@ -2,52 +2,107 @@
 using System.Collections;
 using UnityEditor;
 using System.Collections.Generic;
+
+
 [CustomEditor(typeof(ChunkGenerator))]
 public class ChunkGeneratorEditor : Editor
 {
 
     // bool[] generator.chunks;
-    string searchPhrase = "";
-    bool showSelecteds = true;
-    bool showNotSelecteds = true;
-    bool showPreview = true;
+    List<ChunkGenerator.LayerSectionInformation> layersInfo;
+    void Initiate()
+    {
+        ChunkGenerator generator = target as ChunkGenerator;
+
+        layersInfo = generator.layersInfo;
+        if (layersInfo.Count > 0)
+            return;
+        else
+            Debug.Log("Count less or equal to 0");
+        generator.layersInfo = new List<ChunkGenerator.LayerSectionInformation>();
+        for (int i = 0; i < 10; i++)
+        {
+            generator.layersInfo.Add(new ChunkGenerator.LayerSectionInformation());
+        }
+        
+        if (generator.levelLayers.Count > 0)
+            return;
+        generator.levelLayers = new List<LevelLayer>(0);
+        for (int i = 0; i < 10; i++)
+        {
+            generator.levelLayers.Add(new LevelLayer());
+        }
+    }
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
-
-        GUILayout.Box("Remember, in order to better see previews, put the CoC on top-left corner of the chunk.");
+        Initiate();
+        if (GUILayout.Button("Scan"))
+            ScanForLayers();
+        if (GUILayout.Button("Instantiate"))
+            Generate();
+        ChunkGenerator generator = target as ChunkGenerator;
+        for (int i = 0; i < 10; i++)
+        {
+            if (generator.visibleLayers[i])
+                CreateLayerSection(i);
+            else
+                CreateMiniLevelSection(i);
+        }
+    }
+    void CreateMiniLevelSection(int index)
+    {
         ChunkGenerator generator = target as ChunkGenerator;
         GUILayout.BeginHorizontal();
-        GUILayout.Label("Search: ",GUILayout.Width(60));
-        searchPhrase = GUILayout.TextField(searchPhrase);
+        if (GUILayout.Button(Resources.Load<Texture>("WhiteTriangle"), GUILayout.Width(20), GUILayout.Height(20)))
+            generator.visibleLayers[index] = true;
+        GUILayout.Box("Layer " + index.ToString());
         GUILayout.EndHorizontal();
-       
+    }
+    void CreateLayerSection(int index)
+    {
+        ChunkGenerator generator = target as ChunkGenerator;
         GUILayout.BeginHorizontal();
-        showNotSelecteds = GUILayout.Toggle(showNotSelecteds, "ShowNotSelecteds");
-        showSelecteds = GUILayout.Toggle(showSelecteds, "ShowSelecteds");
-        showPreview = GUILayout.Toggle(showPreview, "Show Preview");
+
+        if (GUILayout.Button(Resources.Load<Texture>("RedTriangle"), GUILayout.Width(20), GUILayout.Height(20)))
+            generator.visibleLayers[index] = false;
+        GUILayout.Box("Layer " + index.ToString());
+        GUILayout.EndHorizontal();
+        GUILayout.Box("Remember, in order to better see previews, put the CoC on top-left corner of the chunk.");
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Search: ", GUILayout.Width(60));
+        layersInfo[index].searchPhrase = GUILayout.TextField(layersInfo[index].searchPhrase);
+        GUILayout.EndHorizontal();
+
+        GUILayout.BeginHorizontal();
+        layersInfo[index].showNotSelecteds = GUILayout.Toggle(layersInfo[index].showNotSelecteds, "ShowNotSelecteds");
+        layersInfo[index].showSelecteds = GUILayout.Toggle(layersInfo[index].showSelecteds, "ShowSelecteds");
+        layersInfo[index].showPreview = GUILayout.Toggle(layersInfo[index].showPreview, "Show Preview");
         GUILayout.EndHorizontal();
         string[] savedChunkNames = CubeFile.CheckDirectory("SavedFiles/Chunks");
         if (GUILayout.Button("Build Prefabs"))
-            BuildChunkPrefab(savedChunkNames);
-        if (generator.chunksSelected.Length < savedChunkNames.Length)
-            generator.chunksSelected = new bool[savedChunkNames.Length];
+            BuildChunkPrefab(savedChunkNames, index);
+        if (generator.levelLayers[index].chunksSelected.Length < savedChunkNames.Length)
+            generator.levelLayers[index].chunksSelected = new bool[savedChunkNames.Length];
 
         float maxX = 0;
         float minX = 0;
         float maxY = 0;
         float minY = 0;
+        if (generator.levelLayers[index].hSpeed.Length == 0)
+            generator.levelLayers[index].hSpeed = new float[savedChunkNames.Length];
         for (int j = 0; j < savedChunkNames.Length; j++)
         {
-            if (!savedChunkNames[j].Contains(searchPhrase))
+            if (!savedChunkNames[j].Contains(layersInfo[index].searchPhrase))
                 continue;
-            if (!(showSelecteds && showNotSelecteds))
-                if ((showSelecteds && !generator.chunksSelected[j]) || (showNotSelecteds && generator.chunksSelected[j])
-                    || (!showSelecteds && !showNotSelecteds))
+            if (!(layersInfo[index].showSelecteds && layersInfo[index].showNotSelecteds))
+                if ((layersInfo[index].showSelecteds && !generator.levelLayers[index].chunksSelected[j]) || (layersInfo[index].showNotSelecteds && generator.levelLayers[index].chunksSelected[j])
+                    || (!layersInfo[index].showSelecteds && !layersInfo[index].showNotSelecteds))
                     continue;
             Chunk c1 = CubeFile.DeSerializeObject<Chunk>(savedChunkNames[j], "Chunks");
             Rect ChunksRect;
-            if (showPreview)
+            if (layersInfo[index].showPreview)
             {
                 maxX = c1.objects[0].position.left + c1.objects[0].position.width;
                 minX = c1.objects[0].position.left;
@@ -61,7 +116,7 @@ public class ChunkGeneratorEditor : Editor
                     minY = Mathf.Min(minY, item.position.top);
                 }
 
-                float scaler = (maxY-minY > maxX-minX ? 450.0f : 300.0f) / Mathf.Max((maxX - minX), (maxY - minY));
+                float scaler = (maxY - minY > maxX - minX ? 450.0f : 300.0f) / Mathf.Max((maxX - minX), (maxY - minY));
                 ChunksRect = GUILayoutUtility.GetRect(400, 200);
                 GUI.Box(ChunksRect, GUIContent.none);
                 Vector2 Offset = new Vector2(ChunksRect.xMin + 20, ChunksRect.yMin + 20);
@@ -83,28 +138,29 @@ public class ChunkGeneratorEditor : Editor
             else
                 ChunksRect = GUILayoutUtility.GetRect(200, 30);
             Color guiDefColor = GUI.color;
-            if (generator.chunksSelected[j])
+            if (generator.levelLayers[index].chunksSelected[j])
                 GUI.color = Color.green;
             else
                 GUI.color = Color.red;
-            if (GUI.Button(new Rect(ChunksRect.xMax - 105, ChunksRect.yMax - 24, 100, 20), !generator.chunksSelected[j] ? "Select" : "Deselect"))
-                generator.chunksSelected[j] = true ^ generator.chunksSelected[j];
+            if (GUI.Button(new Rect(ChunksRect.xMax - 105, ChunksRect.yMax - 24, 100, 20), !generator.levelLayers[index].chunksSelected[j] ? "Select" : "Deselect"))
+                generator.levelLayers[index].chunksSelected[j] = true ^ generator.levelLayers[index].chunksSelected[j];
             GUI.color = guiDefColor;
-            GUI.Label(new Rect(ChunksRect.xMax - 210, ChunksRect.yMax - 24, 100, 20), c1.Name);
-            GUI.Label(new Rect(ChunksRect.xMax - 400, ChunksRect.yMax - 24, 200, 20), "Chunk Size: " +(maxX - minX).ToString() + " X " + (maxY - minY).ToString());
+            GUI.Label(new Rect(ChunksRect.xMax - 210, ChunksRect.yMax - 24, 100, 20), c1.Name); 
+            GUI.Label(new Rect(ChunksRect.xMax - 400, ChunksRect.yMax - 44, 100, 20), "Speed: ");
+            generator.levelLayers[index].hSpeed[j] = float.Parse(GUI.TextField(new Rect(ChunksRect.xMax - 300, ChunksRect.yMax - 44,100 , 20), generator.levelLayers[index].hSpeed[j].ToString()));
+            GUI.Label(new Rect(ChunksRect.xMax - 400, ChunksRect.yMax - 24, 200, 20), "Chunk Size: " + (maxX - minX).ToString() + " X " + (maxY - minY).ToString());
         }
-        
-    }
 
+    }
     GameObject CreateSceneObject(LevelObj item, Transform parent = null)
     {
-        bool isChunk = false;
+      
         if (item is Chunk)
         {
             Debug.Log("Is Chunk");
 
             GameObject ChunkContainer = new GameObject(((Chunk)item).Name + "." + item.id.ToString());
-
+            
             ChunkContainer.transform.position = new Vector3(1 * (float)(((Chunk)item).centerOfChunk.left) /
                                                  GlobalVariables.minifier, -1 * (float)(((Chunk)item).centerOfChunk.top) /
                                                  GlobalVariables.minifier, 0) + new Vector3(20.0f / GlobalVariables.minifier, 40.0f / GlobalVariables.minifier, item.position.depth);
@@ -121,11 +177,17 @@ public class ChunkGeneratorEditor : Editor
                 if (item2.position.left + item2.position.width + ((Chunk)item).centerOfChunk.left > xMax)
                     xMax = item2.position.left + item2.position.width + ((Chunk)item).centerOfChunk.left;
                 CreateSceneObject(item2, ChunkContainer.transform);
-
             }
             Debug.Log(xMax + " " + xMin);
-            cData.chunkLength = (xMax - xMin) / GlobalVariables.minifier;
+            ChunkContainer.GetComponent<ChunkData>().chunkLength = (xMax - xMin) / GlobalVariables.minifier;
+
+           
+            GameObject sample = AssetDatabase.LoadAssetAtPath("Assets/ChunkPrefabs/Prefabs/" + ((Chunk)item).Name + "." + item.id.ToString() + ".prefab", typeof(GameObject)) as GameObject;
+            if(sample == null)
+                PrefabUtility.CreatePrefab("Assets/ChunkPrefabs/Prefabs/" + ChunkContainer.name + ".prefab", ChunkContainer.gameObject);
+
             DestroyImmediate(ChunkContainer);
+
             return (AssetDatabase.LoadAssetAtPath("Assets/ChunkPrefabs/Prefabs/" + ((Chunk)item).Name + "." + item.id.ToString() + ".prefab", typeof(GameObject)) as GameObject);
         }
         else
@@ -154,7 +216,7 @@ public class ChunkGeneratorEditor : Editor
                 tmpRenderer = sceneObj.GetComponent<MeshRenderer>();
                 objMaterial = tmpRenderer.material;
             }
-
+            
             string meshName = item.position.width.ToString() + "X" + item.position.height;
             Mesh mesh = AssetDatabase.LoadAssetAtPath("Assets/ChunkPrefabs/" + meshName + ".asset", typeof(Mesh)) as Mesh;
 
@@ -208,31 +270,84 @@ public class ChunkGeneratorEditor : Editor
                                                                GlobalVariables.minifier, 0) + new Vector3((1 * (float)item.position.width /
                                                                                                             (GlobalVariables.minifier * 2)) + 1, (-1 * (float)item.position.height /
                                                                                                    (GlobalVariables.minifier * 2)) + 2, parent == null ? item.position.depth : parent.position.z - item.position.depth);
-            string chunkObjName = "";
-
+         
             sceneObjContainer.transform.position += parent.position - new Vector3(25 / GlobalVariables.minifier, 50 / GlobalVariables.minifier, 0);
             sceneObjContainer.transform.parent = parent;
-            chunkObjName = parent.name;
-            PrefabUtility.CreatePrefab("Assets/ChunkPrefabs/Prefabs/" + parent.name + ".prefab", parent.gameObject);
-
-
+         
+         
             return null;
         }
         
        
     }
-
-    void BuildChunkPrefab(string[] chunkNames)
+    void BuildChunkPrefab(string[] chunkNames ,int index)
     {
        
          ChunkGenerator generator = target as ChunkGenerator;
-         generator.chunks = new List<GameObject>();
+         generator.levelLayers[index].chunks = new List<GameObject>();
         for (int i = 0; i < chunkNames.Length; i++)
         {
-            if (!generator.chunksSelected[i])
+            if (!generator.levelLayers[index].chunksSelected[i])
                 continue;
-            generator.chunks.Add(CreateSceneObject(CubeFile.DeSerializeObject<Chunk>(chunkNames[i], "Chunks")));
+            generator.levelLayers[index].chunks.Add(CreateSceneObject(CubeFile.DeSerializeObject<Chunk>(chunkNames[i], "Chunks")));
             
         }
     }
+
+    void Generate()
+    {
+        ChunkGenerator generator = target as ChunkGenerator;
+        for (int i = 0; i < generator.levelLayers.Count; i++)
+        {
+            if (generator.levelLayers[i].chunks.Count == 0)
+                continue;
+            int randomIndex = Random.Range(0, generator.levelLayers[i].chunks.Count);
+            GameObject sample = Instantiate(generator.levelLayers[i].chunks[randomIndex], generator.levelLayers[i].initiationPointOfGeneration,Quaternion.identity) as GameObject;
+            generator.levelLayers[i].initiationPointOfGeneration += new Vector3(sample.GetComponent<ChunkData>().chunkLength, 0, 0);
+        }
+
+    }
+    void ScanForLayers()
+    {
+        ChunkData[] levelObjects;
+        levelObjects = GameObject.FindObjectsOfType<ChunkData>();
+        List<ChunkData>[] gObjects = new List<ChunkData>[10];
+        for (int i = 0; i < 10; i++)
+        {
+            gObjects[i] = new List<ChunkData>();
+            foreach (var item in levelObjects)
+            {
+                if (item.transform.position.z == 40 - ((i + 1) * 5))
+                {
+                    gObjects[i].Add(item);
+                }
+
+            }
+            PinInitiationPoint(i, gObjects[i]);
+            Debug.Log("There are " + gObjects[i].Count + " Chunks in Layer " + (i+1).ToString());
+        }
+
+
+
+    }
+
+    void PinInitiationPoint(int layerIndex, List<ChunkData> chunks)
+    {
+        ChunkGenerator generator = target as ChunkGenerator;
+        if (chunks.Count == 0)
+            return;
+        float maxX = chunks[0].transform.position.x + chunks[0].chunkLength;
+        generator.levelLayers[layerIndex].currentChunk = chunks[0].gameObject;
+        foreach (var item in chunks)
+        {
+            if (item.transform.position.x + item.chunkLength > maxX)
+            {
+                maxX = item.transform.position.x + item.chunkLength;
+                generator.levelLayers[layerIndex].currentChunk = item.gameObject;
+            }
+        }
+        generator.levelLayers[layerIndex].initiationPointOfGeneration = new Vector3(maxX, chunks[0].transform.position.y, chunks[0].transform.position.z);
+    }
+
 }
+
