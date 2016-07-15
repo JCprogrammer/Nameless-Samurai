@@ -19,7 +19,7 @@ public class SENaturalBloomAndDirtyLensEditor : Editor
 		bloomIntensity = serObj.FindProperty("bloomIntensity");
 		lensDirtIntensity = serObj.FindProperty("lensDirtIntensity");
 		lensDirtTexture = serObj.FindProperty("lensDirtTexture");
-		banner = (Texture2D)Resources.LoadAssetAtPath("Assets/Sonic Ether/Natural Bloom/GUI/senbdlEditorTex.png", typeof(Texture2D));
+		banner = (Texture2D)AssetDatabase.LoadAssetAtPath("Assets/Sonic Ether/Natural Bloom/GUI/senbdlEditorTex.png", typeof(Texture2D));
 
 	}
 

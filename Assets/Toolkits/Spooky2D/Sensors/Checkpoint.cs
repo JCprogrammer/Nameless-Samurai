@@ -14,7 +14,7 @@ public class Checkpoint : MonoBehaviour {
     } 
     public void SetCheckpoint()
     {
-        checkpoints.Add(new point(Camera.main.GetComponent<AudioSource>().audio.time,
+        checkpoints.Add(new point(Camera.main.GetComponent<AudioSource>().GetComponent<AudioSource>().time,
                                   GameObject.FindGameObjectWithTag("Player").transform.position));
         Debug.Log("CheckPoint Added At: " + Time.timeSinceLevelLoad);
 
@@ -29,7 +29,7 @@ public class Checkpoint : MonoBehaviour {
         }
         point loadedPoint = checkpoints[checkpoints.Count - 1];
         GameObject.FindGameObjectWithTag("Player").transform.position = loadedPoint.playerPosition;
-        Camera.main.GetComponent<AudioSource>().audio.time = loadedPoint.soundSeekerLocation;
+        Camera.main.GetComponent<AudioSource>().GetComponent<AudioSource>().time = loadedPoint.soundSeekerLocation;
         Camera.main.SendMessage("FindPlayer");
     }
     public class point

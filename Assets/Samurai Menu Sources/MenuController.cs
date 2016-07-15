@@ -22,7 +22,7 @@ public class MenuController : MonoBehaviour {
 			int index = -1;
 
 			while((index = Random.Range(0, 3)) == currentBackgroundIndex) { }
-			guiTexture.texture = backgrounds[index];
+			GetComponent<GUITexture>().texture = backgrounds[index];
 			currentBackgroundIndex = index;
 			nextBackgroundTimeStamp = Time.timeSinceLevelLoad + backgroundInterval;
 		}
@@ -66,7 +66,7 @@ public class MenuController : MonoBehaviour {
 				
 				GameObject.Find("Narrative").GetComponent<NarrativeController>().enabled = true;
 				//GameObject.Find("Narrative").GetComponent<NarrativeController>().Start();
-				GameObject.Find("Narrative Background").guiTexture.enabled = true;
+				GameObject.Find("Narrative Background").GetComponent<GUITexture>().enabled = true;
 			}
 		}
 	}

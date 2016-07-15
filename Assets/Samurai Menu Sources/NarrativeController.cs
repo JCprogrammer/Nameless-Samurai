@@ -25,7 +25,7 @@ public class NarrativeController : MonoBehaviour
 			
 			if(textCounter <= narrativeText.text.Length)
 			{
-				guiText.text = narrativeText.text.Substring(0, textCounter);
+				GetComponent<GUIText>().text = narrativeText.text.Substring(0, textCounter);
 			}
 			
 			if(textCounter == narrativeText.text.Length)

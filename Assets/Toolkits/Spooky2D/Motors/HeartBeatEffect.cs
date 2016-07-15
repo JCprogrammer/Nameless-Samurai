@@ -8,13 +8,13 @@ public class HeartBeatEffect : MonoBehaviour {
     public float beatSpeed = 1;
     void Start()
     {
-        materialColor = transform.renderer.material.color;
+        materialColor = transform.GetComponent<Renderer>().material.color;
     }
     void LateUpdate()
     {
         Color newColor = new Color (materialColor.r,materialColor.b,materialColor.g,
             materialColor.a * beatAnimator.Evaluate(Time.timeSinceLevelLoad * beatSpeed));
-        transform.renderer.material.color = newColor;
+        transform.GetComponent<Renderer>().material.color = newColor;
 
 
     }

@@ -16,8 +16,8 @@ public class BloodEffectController : MonoBehaviour {
 
 	public void Adjust()
 	{
-		Vector3 bloodEffectStartNormalizedPosition = Camera.main.WorldToScreenPoint(GameObject.FindGameObjectWithTag("Player").renderer.bounds.center);
-		Vector3 bloodEffectEndNormalizedPosition = Camera.main.WorldToScreenPoint(GameObject.FindGameObjectWithTag("Player").renderer.bounds.center + new Vector3(bloodEffectLength, 0.0F, 0.0F));
+		Vector3 bloodEffectStartNormalizedPosition = Camera.main.WorldToScreenPoint(GameObject.FindGameObjectWithTag("Player").GetComponent<Renderer>().bounds.center);
+		Vector3 bloodEffectEndNormalizedPosition = Camera.main.WorldToScreenPoint(GameObject.FindGameObjectWithTag("Player").GetComponent<Renderer>().bounds.center + new Vector3(bloodEffectLength, 0.0F, 0.0F));
 		bloodEffectStartNormalizedPosition = new Vector3(bloodEffectStartNormalizedPosition.x / Screen.width, (bloodEffectStartNormalizedPosition.y / Screen.height), 0.0F);
 		bloodEffectEndNormalizedPosition = new Vector3(bloodEffectEndNormalizedPosition.x / Screen.width, (bloodEffectEndNormalizedPosition.y / Screen.height), 0.0F);
 
@@ -53,7 +53,7 @@ public class BloodEffectController : MonoBehaviour {
 		collidingGameObject.AddComponent<Rigidbody2D>();
 		collidingGameObject.GetComponent<Rigidbody2D>().isKinematic = true;*/
 
-		guiTexture.color = new Color(0.5F, 0.5F, 0.5F, 0.5F);
+		GetComponent<GUITexture>().color = new Color(0.5F, 0.5F, 0.5F, 0.5F);
 	}
 
 	/*public void ActiveCollider()
@@ -93,9 +93,9 @@ public class BloodEffectController : MonoBehaviour {
 
 		if(disappearing)
 		{
-			guiTexture.color = new Color(0.5F, 0.5F, 0.5F, guiTexture.color.a - (fadeOutSpeed * Time.deltaTime));
+			GetComponent<GUITexture>().color = new Color(0.5F, 0.5F, 0.5F, GetComponent<GUITexture>().color.a - (fadeOutSpeed * Time.deltaTime));
 
-            if (guiTexture.color.a <= 0.0F)
+            if (GetComponent<GUITexture>().color.a <= 0.0F)
             {
                 disappearing = false;
                 isAppear = false;

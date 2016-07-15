@@ -106,8 +106,8 @@ public class SENBDLMainCube : MonoBehaviour
 
 		//privateColor = glowColor * 0.8f;
 
-		cubeEmissivePart.renderer.material.SetColor ("_EmissionColor", privateColor);
-		light.color = privateColor;
+		cubeEmissivePart.GetComponent<Renderer>().material.SetColor ("_EmissionColor", privateColor);
+		GetComponent<Light>().color = privateColor;
 
 		Color invColor = new Color();
 		invColor.r = 1.0f - glowColor.r;
@@ -115,7 +115,7 @@ public class SENBDLMainCube : MonoBehaviour
 		invColor.b = 1.0f - glowColor.b;
 		invColor = Color.Lerp(invColor, Color.white, 0.1f);
 
-		particles.renderer.material.SetColor("_TintColor", invColor);
+		particles.GetComponent<Renderer>().material.SetColor("_TintColor", invColor);
 		
 	}
 

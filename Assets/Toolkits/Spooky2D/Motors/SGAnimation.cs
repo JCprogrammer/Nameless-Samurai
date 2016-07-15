@@ -124,7 +124,7 @@ public class SGAnimation : Motor{
                 }
             }
                 if ((int)currenttextureId <= textures.Length - 1)
-            transform.renderer.material.mainTexture = textures[(int)currenttextureId];
+            transform.GetComponent<Renderer>().material.mainTexture = textures[(int)currenttextureId];
         }
        
     }

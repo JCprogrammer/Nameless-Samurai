@@ -16,7 +16,7 @@ public class TimeC : MonoBehaviour {
 
     void StopTime()
     {
-        if (GetComponent<AudioSource>().audio.time >= stopAt)
+        if (GetComponent<AudioSource>().GetComponent<AudioSource>().time >= stopAt)
             deltaTime = 0;
     }
     public void Increase()

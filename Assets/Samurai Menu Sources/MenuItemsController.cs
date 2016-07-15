@@ -19,9 +19,9 @@ public class MenuItemsController : MonoBehaviour {
 			foreach(MenuItemController item in GetComponentsInChildren<MenuItemController>())
 			{
 				if(item.menuItemIndex == _selectedIndex)
-					item.guiText.color = Color.yellow;
+					item.GetComponent<GUIText>().color = Color.yellow;
 				else
-					item.guiText.color = Color.white;
+					item.GetComponent<GUIText>().color = Color.white;
 			}
 		}
 	}

@@ -30,7 +30,7 @@ public class SENBDLGlowingOrbitingCube : MonoBehaviour
 		color *= Mathf.Pow(Mathf.Sin(Time.time * pulseSpeed + phase) * 0.49f + 0.51f, 2.0f);
 
 
-		renderer.material.SetColor("_EmissionColor", color);
-		light.color = color;
+		GetComponent<Renderer>().material.SetColor("_EmissionColor", color);
+		GetComponent<Light>().color = color;
 	}
 }

@@ -54,7 +54,7 @@ public class GravityMotor: Motor {
         //}
 
         if (transform.position.y + ((GetComponent<BoxCollider2D>().size.y/2 + 0.1f) ) >
-       coll.transform.position.y + (coll.transform.GetComponent<BoxCollider2D>().size.y / 2) - coll.transform.GetComponent<BoxCollider2D>().center.y)
+       coll.transform.position.y + (coll.transform.GetComponent<BoxCollider2D>().size.y / 2) - coll.transform.GetComponent<BoxCollider2D>().offset.y)
         {
             gravityOn = false;
             gravityForce = 0;

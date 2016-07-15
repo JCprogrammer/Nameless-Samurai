@@ -5,8 +5,8 @@ using System.Collections;
 public class RigidBodyEstablisher : MonoBehaviour {
 	
 	void Start () {
-		rigidbody2D.angularDrag = 0;
-		rigidbody2D.gravityScale = 0;
-		rigidbody2D.fixedAngle = true;
+		GetComponent<Rigidbody2D>().angularDrag = 0;
+		GetComponent<Rigidbody2D>().gravityScale = 0;
+		GetComponent<Rigidbody2D>().fixedAngle = true;
 	}
 }

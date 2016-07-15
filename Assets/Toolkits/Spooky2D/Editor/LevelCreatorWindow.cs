@@ -680,9 +680,9 @@ public class LevelCreatorWindow : EditorWindow
         }
         
         camCom = cam.GetComponent<Camera>();
-        if (camCom.isOrthoGraphic == true)
+        if (camCom.orthographic == true)
             return;
-        camCom.isOrthoGraphic = true;
+        camCom.orthographic = true;
         camCom.orthographicSize = 15;
         if (lst4.items.Count > 0)
         {

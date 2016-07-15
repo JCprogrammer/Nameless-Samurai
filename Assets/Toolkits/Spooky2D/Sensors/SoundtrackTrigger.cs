@@ -14,7 +14,7 @@ public class SoundtrackTrigger : MonoBehaviour {
     {
         if (!isTriggered)
         {
-            if (soundtrack.audio.time >= TriggerTime)
+            if (soundtrack.GetComponent<AudioSource>().time >= TriggerTime)
             {
                 if (!sendMessageByTag)
                 {

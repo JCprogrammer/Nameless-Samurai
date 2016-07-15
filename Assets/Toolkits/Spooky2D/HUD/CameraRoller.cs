@@ -46,7 +46,7 @@ public class CameraRoller : MonoBehaviour {
         if ( (diff - playerPositionOffset).magnitude > 0.01f)
         {
 
-            if (!IsInBoundary(this.camera, GameObject.FindGameObjectWithTag("Player").transform, boundaryRatio))
+            if (!IsInBoundary(this.GetComponent<Camera>(), GameObject.FindGameObjectWithTag("Player").transform, boundaryRatio))
             {
                 unbalanced = true;
 

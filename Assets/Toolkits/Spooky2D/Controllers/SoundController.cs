@@ -15,7 +15,7 @@ public class SoundController : MonoBehaviour {
         initiationPoint = backgroundMusicSource.volume;
         backgroundMusicSource.volume = 0;
         //Debug.Log("ssssssssssssssssss : " + startFrom.ToString());
-		backgroundMusicSource.audio.time = startFrom;
+		backgroundMusicSource.GetComponent<AudioSource>().time = startFrom;
         songProgress = startFrom;
         
     }
@@ -28,12 +28,12 @@ public class SoundController : MonoBehaviour {
             backgroundMusicSource.volume += 0.005f;
             //Debug.Log(backgroundMusicSource);
             if (!stopCounting)
-                fakeAutioTime = backgroundMusicSource.audio.time.ToString();
+                fakeAutioTime = backgroundMusicSource.GetComponent<AudioSource>().time.ToString();
             
         //backgroundMusicSource.audio.time = songProgress += GlobalVariables.deltaTime;
             sample1 = sample2;
             //Debug.Log(backgroundMusicSource.audio.timeSamples);
-            sample2 = backgroundMusicSource.audio.time;
+            sample2 = backgroundMusicSource.GetComponent<AudioSource>().time;
             //Debug.Log(sample2 - sample1);
  
 	}

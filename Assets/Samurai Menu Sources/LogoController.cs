@@ -28,11 +28,11 @@ public class LogoController : MonoBehaviour {
 		switch(state)
 		{
 		case State.FadingIn:
-			guiTexture.color = new Color(guiTexture.color.r, guiTexture.color.g, guiTexture.color.b, guiTexture.color.a + fadeInSpeed * Time.deltaTime);
+			GetComponent<GUITexture>().color = new Color(GetComponent<GUITexture>().color.r, GetComponent<GUITexture>().color.g, GetComponent<GUITexture>().color.b, GetComponent<GUITexture>().color.a + fadeInSpeed * Time.deltaTime);
 
-			if(guiTexture.color.a >= 1.0F)
+			if(GetComponent<GUITexture>().color.a >= 1.0F)
 			{
-				guiTexture.color = new Color(guiTexture.color.r, guiTexture.color.g, guiTexture.color.b, 1.0F);
+				GetComponent<GUITexture>().color = new Color(GetComponent<GUITexture>().color.r, GetComponent<GUITexture>().color.g, GetComponent<GUITexture>().color.b, 1.0F);
 
 				inBetweenEndTimeStamp = Time.timeSinceLevelLoad + inBetweenTime;
 				state = State.InBetween;
@@ -45,11 +45,11 @@ public class LogoController : MonoBehaviour {
 			}
 			break;
 		case State.FadingOut:
-			guiTexture.color = new Color(guiTexture.color.r, guiTexture.color.g, guiTexture.color.b, guiTexture.color.a - fadeOutSpeed * Time.deltaTime);
+			GetComponent<GUITexture>().color = new Color(GetComponent<GUITexture>().color.r, GetComponent<GUITexture>().color.g, GetComponent<GUITexture>().color.b, GetComponent<GUITexture>().color.a - fadeOutSpeed * Time.deltaTime);
 
-			if(guiTexture.color.a <= 0.0F)
+			if(GetComponent<GUITexture>().color.a <= 0.0F)
 			{
-				guiTexture.color = new Color(guiTexture.color.r, guiTexture.color.g, guiTexture.color.b, 0.0F);
+				GetComponent<GUITexture>().color = new Color(GetComponent<GUITexture>().color.r, GetComponent<GUITexture>().color.g, GetComponent<GUITexture>().color.b, 0.0F);
 
 				state = State.Done;
 			}
